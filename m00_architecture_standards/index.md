@@ -8,5 +8,6 @@ MindForge est un système de formation professionnelle haut de gamme qui doit su
 
 ## 📁 Répertoire des Documents de Standards Immuables
 * **`mfg_architectural_blueprint_master.md`** : Le guide maître décrivant scrupuleusement les 5 grands patrons de conception à appliquer (Hexagonal, Outbox, SAGA, CQRS, et les Invariants de Rendu COSMOS 2D/3D).
-* **`mfg_multi_agent_pipeline_patterns.md`** : **Guide d'Ingénierie Multi-Agents en production** (Les patterns critiques sur 7 dimensions : codage, parallélisme, MCP access isolation, PII stripping, model routing, générateur-évaluateur, SAGA, outbox, et trajectoires).
+* **`mfg_multi_agent_pipeline_patterns.md`** : Guide complet des patterns multi-agents de production (G6/Three.js, isolation d'accessibilité, LLMLingua-2 local, et budgets).
+* **`mfg_agentic_sdlc_standards.md`** : **Spécification des Standards de Développement Agentique (AI-SDLC)** (Gabarits de Spec-Driven Development, format d'écriture Gherkin WHEN-THEN-AND, et vocabulaire de la norme RFC 2119).
 * **`index.md`** : Ce fichier d'orientation rapide.
