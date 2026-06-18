@@ -15,7 +15,7 @@
 # 🧠 MODULE 11 : Le Moteur Neuroscientifique (ENGRAM, RIF) — Spécifications de Codage
 
 ## 1. Description du Module
-Gère le cycle de vie de la vitalité, l'hibernation froide (`mfg_engram_vault`) et la résurrection active de la connaissance d'un utilisateur.
+Gère le cycle de vie de la vitalité, l'hibernation froide (`scy_engram_vault`) et la résurrection active de la connaissance d'un utilisateur.
 
 
 ---

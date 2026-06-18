@@ -8,7 +8,7 @@
 ## 🧭 Fiche de Synthèse
 * **Description Fonctionnelle** : Tableau de bord pour formateurs et créateurs de contenu.
 * **Stack Technique Officielle** : React 18, Insforge PostgreSQL, Zilliz Serverless
-* **Patterns d'Ingénierie à Respecter** : k-anonymity (k >= 10), Global Heat Map, mfg_sync_queue WAL
+* **Patterns d'Ingénierie à Respecter** : k-anonymity (k >= 10), Global Heat Map, scy_sync_queue WAL
 
 ---
 

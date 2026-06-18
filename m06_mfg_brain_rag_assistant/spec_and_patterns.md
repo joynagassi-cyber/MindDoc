@@ -1,5 +1,5 @@
-# Module 6 : MFG-BRAIN — RAG & Conversational Assistant — ENVIRONNEMENT TECHNIQUE DE CODAGE DE RÉFÉRENCE
-**ID Module** : M06_MFG_BRAIN_RAG_ASSISTANT  
+# Module 6 : SCY-BRAIN — RAG & Conversational Assistant — ENVIRONNEMENT TECHNIQUE DE CODAGE DE RÉFÉRENCE
+**ID Module** : M06_SCY_BRAIN_RAG_ASSISTANT  
 **Statut de Sûreté** : 🟢 INTÉGRITÉ COGNITIVE ET TECHNIQUE VALIDÉE (ZÉRO INVENTIONS AUTORISÉES)  
 **Date d'Émission** : 2026-06-12  
 
@@ -12,10 +12,10 @@
 
 ---
 
-# 🧠 MODULE 6 : MFG-BRAIN — RAG & Assistant — Spécifications de Codage
+# 🧠 MODULE 6 : SCY-BRAIN — RAG & Assistant — Spécifications de Codage
 
 ## 1. Description du Module
-MFG-BRAIN fournit des explications socratiques personnalisées grâce à un double RAG (fichiers privés et web) consolidé chronologiquement par Graphiti.
+SCY-BRAIN fournit des explications socratiques personnalisées grâce à un double RAG (fichiers privés et web) consolidé chronologiquement par Graphiti.
 
 ## 2. Socratic progressive prompting & Thread-of-Thought
 - Limitation stricte de la génération du Professor AI à un maximum de **2 paragraphes socratiques** par interaction.

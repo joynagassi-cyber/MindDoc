@@ -1,5 +1,5 @@
-# Module 8 : MFG-READER SUITE — Lecture Enrichie — ENVIRONNEMENT TECHNIQUE DE CODAGE DE RÉFÉRENCE
-**ID Module** : M08_MFG_READER_SUITE  
+# Module 8 : SCY-READER SUITE — Lecture Enrichie — ENVIRONNEMENT TECHNIQUE DE CODAGE DE RÉFÉRENCE
+**ID Module** : M08_SCY_READER_SUITE  
 **Statut de Sûreté** : 🟢 INTÉGRITÉ COGNITIVE ET TECHNIQUE VALIDÉE (ZÉRO INVENTIONS AUTORISÉES)  
 **Date d'Émission** : 2026-06-12  
 
@@ -12,7 +12,7 @@
 
 ---
 
-# 📖 MODULE 8 : MFG-READER SUITE — Lecture Enrichie — Spécifications de Codage
+# 📖 MODULE 8 : SCY-READER SUITE — Lecture Enrichie — Spécifications de Codage
 
 ## 1. Description du Module
 La Reader Suite intègre le File Viewer bionique, le Book Orchestrator et la Page Gallery pour une lecture immersive sans scintillement avec rendu KaTeX mathématique en local.

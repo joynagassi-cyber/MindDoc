@@ -1,5 +1,5 @@
-# Module 7 : MFG-IMPRINT — Cognitive Transfer Engine — ENVIRONNEMENT TECHNIQUE DE CODAGE DE RÉFÉRENCE
-**ID Module** : M07_MFG_IMPRINT_COGNITIVE  
+# Module 7 : SCY-IMPRINT — Cognitive Transfer Engine — ENVIRONNEMENT TECHNIQUE DE CODAGE DE RÉFÉRENCE
+**ID Module** : M07_SCY_IMPRINT_COGNITIVE  
 **Statut de Sûreté** : 🟢 INTÉGRITÉ COGNITIVE ET TECHNIQUE VALIDÉE (ZÉRO INVENTIONS AUTORISÉES)  
 **Date d'Émission** : 2026-06-12  
 
@@ -12,7 +12,7 @@
 
 ---
 
-# 🃏 MODULE 7 : MFG-IMPRINT — Transfert Cognitif — Spécifications de Codage
+# 🃏 MODULE 7 : SCY-IMPRINT — Transfert Cognitif — Spécifications de Codage
 
 ## 1. Description du Module
 IMPRINT "arme" le cerveau de l'étudiant avant sa lecture en l'obligeant à recopier à la main les 20% d'idées clés de Pareto et à explorer la racine étymologique des mots complexes.
