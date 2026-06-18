@@ -78,3 +78,10 @@ Un moteur d'analyse local à coût nul (0$ d'appels LLM, règles Rust) affiche u
 
 ### F. Reveal by Relevance (La Vue Pertinente)
 Filtre dynamiquement l'affichage pour masquer le superflu et recentrer l'attention exclusive sur les **150 concepts** les plus pertinents par rapport au contexte de l'étudiant (requêtes récentes, cours actif), assurant un focus absolu sans saturation de l'attention.
+
+
+### G. Le Zoom Sémantique Hippocampal (COSMOS Mode 22)
+S'inspirant des techniques de méditation cognitive, COSMOS intègre le **Semantic Zoom Graph** :
+- Force l'utilisateur à naviguer spatialement et mentalement à l'aide des zooms entre l'atome (la fiche concept micro) et la galaxie complète (la KB globale).
+- Cette navigation spatiale active les cellules de lieu de l'hippocampe d'une manière similaire à un parcours d'orientation géographique physique, ancrant géographiquement les connaissances dans les structures mnésiques profondes de l'utilisateur.
+

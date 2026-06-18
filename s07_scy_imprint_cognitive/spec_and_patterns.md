@@ -26,3 +26,13 @@ Pour garantir la réussite absolue du codage de ce module par nos agents de dév
 2. **Ne pas modifier les structures de données** : Référence-toi à l'index SQL consolidé de la base de données Insforge.
 3. **Respecter la palette de couleurs spatiale** : Ne jamais introduire de rouge ou de bleu fade en dehors des tokens d'interface fixés dans `design.md`.
 4. **Validation des schémas** : Tout retour JSON d'agent s'appuie sur la validation stricte de modèles **Zod** avec gestion de retries.
+
+
+## Spécification de Verrouillage Leech & Ancrage Manuel IMPRINT
+
+### A. Blocage de Révisions Numériques des Cartes Problématiques (Leechs)
+Si une carte mémoire de révision est identifiée de manière déterministe comme une **Leech** (répétitions d'échecs successives par l'utilisateur) :
+1. Le système **bloque et suspend** l'affichage numérique de cette carte sur APEX.
+2. Il force l'étudiant à effectuer une **session d'écriture manuscrite IMPRINT de Cran 5** (recopier manuellement un texte structuré de 50 à 65 mots).
+3. L'acte moteur de tracer le "Tree Renderer" de la formule à la main sur un carnet physique crée une trace mnésique indestructible supérieure au simple clic. Le nœud n'est ré-activé sur APEX qu'après la validation de la session manuscrite.
+

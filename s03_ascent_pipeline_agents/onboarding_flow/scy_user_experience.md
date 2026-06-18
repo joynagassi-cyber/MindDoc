@@ -1560,6 +1560,22 @@ Pour notre nouveau persona de **Créateur de Contenu Formateur (The Creator-Educ
 - **Proactive Alerts Panel** : Reçoit des notifications d'insights rédigées par l'agent `COGNITIVE-VALIDATOR` expliquant de manière humaine et socratique pourquoi les étudiants se trompent sur les quiz.
 - **Instant Clarifier** : Un bouton d'action rapide sur l'application mobile permet d'enregistrer une vidéo explicative de 1 minute ou de rédiger une note. L'intégration RAG et les cartes d'études de tous les étudiants de la cohorte sont mis à jour instantanément en tâche de fond (0$ d'infrastructure, ré-indexation Zilliz immédiate).
 
+
+
+## 6. Spécifications de l'Expérience Cognitive de Pointe (v3.5)
+
+### 6.1 Feature Boost Sommeil (Intégration Chronicle)
+- **Le besoin biologique** : Le cerveau 'rejoue' et consolide les souvenirs durant les phases de sommeil lent profond, effectuant le transfert d'engrammes de l'hippocampe vers le néocortex.
+- **La Feature** : L'agent **CHRONICLE** (`AGENT-10`) suit la progression de l'élève. Juste avant son heure de coucher habituelle, il lui notifie une **micro-révision ciblée de 2 minutes** contenant exclusivement les 3 concepts les plus denses étudiés dans la journée, marquant ces synapses comme prioritaires pour la consolidation nocturne.
+
+### 6.2 Protocole Tiny Habit (Frictionless Re-entry)
+- **Le besoin psychologique** : Le retard accumulé crée une angoisse de surcharge (backlog anxiogène), cause n°1 d'abandon des systèmes de mémorisation.
+- **Le Protocole** : Si un élève s'absente plus de 3 jours, COSMOS et APEX **masquent l'intégralité du backlog de cartes en retard**. L'interface présente uniquement un **'Mode Minimal' contenant 3 cartes prioritaires**. Dès que ces 3 cartes sont validées, le système le félicite et débloque progressivement le reste, maintenant la plasticité sans aucun stress de surcharge.
+
+### 6.3 Calibrage de Biais de Dunning-Kruger (Métacognition)
+- **Le besoin psychologique** : Calibrer l'écart entre la confiance de l'apprenant et son niveau réel de mémorisation.
+- **Le Protocole** : Si l'étudiant déclare une confiance élevée (SMI de confiance) mais obtient un taux de rappel réel faible sur APEX, l'agent **DRIFT-GUARDIAN** (`AGENT-07`) intervient pour briser l'illusion de savoir en bloquant temporairement ses fiches et en déclenchant une **session de Teach-Back immédiate** avec `STUDENT-AI`.
+
 ## Document Status
 
 **Status :** Final  
