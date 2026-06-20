@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCY Forge — APEX Interactive FSRS 5.0 Revision Console</title>
+    <style>
+        :root {
+            --bg-main: #020205;
+            --bg-card: #0D0D15;
+            --bg-hover: #1E1B4B;
+            --color-primary: #2563EB;
+            --color-success: #10B981;
+            --color-alert: #D97706;
+            --color-ai: #7C3AED;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --border-default: #374151;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            padding: 32px 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* CARD PANEL */
+        .panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 520px;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-default);
+            padding-bottom: 12px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-symbol {
+            color: var(--color-ai);
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+        }
+
+        .streak-badge {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--color-success);
+            color: var(--color-success);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .card-question {
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--text-primary);
+            max-width: 90%;
+            margin-bottom: 16px;
+        }
+
+        .card-category {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--color-primary);
+            background-color: rgba(37, 99, 235, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .answer-block {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .answer-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            background-color: rgba(2, 2, 5, 0.4);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 3px solid var(--color-ai);
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .explanation-block {
+            font-size: 13px;
+            color: var(--color-alert);
+            font-style: italic;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        /* ACTIONS */
+        .action-area {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 24px;
+        }
+
+        .btn-reveal {
+            background-color: var(--color-ai);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-reveal:hover {
+            background-color: #6D28D9;
+            transform: translateY(-2px);
+        }
+
+        .fsrs-buttons {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            width: 100%;
+        }
+
+        .fsrs-btn {
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 10px 4px;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .fsrs-btn:hover {
+            transform: translateY(-2px);
+            background-color: var(--bg-hover);
+        }
+
+        .fsrs-btn.btn-hard { border-top: 3px solid #EF4444; }
+        .fsrs-btn.btn-good { border-top: 3px solid var(--color-alert); }
+        .fsrs-btn.btn-easy { border-top: 3px solid var(--color-primary); }
+        .fsrs-btn.btn-great { border-top: 3px solid var(--color-success); }
+
+        .btn-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn-interval {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* METRICS PANEL */
+        .metrics-panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 520px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-default);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .fsrs-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background-color: rgba(2, 2, 5, 0.5);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-family: var(--font-mono);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-value.highlight-blue { color: var(--color-primary); }
+        .stat-value.highlight-gold { color: var(--color-alert); }
+        .stat-value.highlight-green { color: var(--color-success); }
+        .stat-value.highlight-violet { color: var(--color-ai); }
+
+        .chart-container {
+            flex-grow: 1;
+            background-color: rgba(2, 2, 5, 0.6);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-family: var(--font-mono);
+        }
+
+        canvas {
+            width: 100%;
+            height: 180px;
+            background-color: transparent;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .shortcuts-tip {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 16px;
+            font-family: var(--font-mono);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- CARD INTERACTIVE PANEL -->
+        <div class="panel">
+            <canvas class="confetti-canvas" id="confetti"></canvas>
+            
+            <div class="header">
+                <div class="logo-section">
+                    <span class="logo-symbol">⬢</span>
+                    <span class="logo-text">SCY FORGE : APEX</span>
+                </div>
+                <div class="streak-badge">
+                    🔥 <span>Streak: 15j</span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <span class="card-category" id="card-category">PROG · RUST ASYNC</span>
+                <p class="card-question" id="card-question">Comment fonctionne le mécanisme de Polling dans les Futures en Rust ?</p>
+                
+                <div class="answer-block" id="answer-block">
+                    <p class="explanation-block">🧠 Révélation d'Ancrage Cognitif :</p>
+                    <div class="answer-text" id="card-answer">
+                        Les Futures en Rust sont passives. L'exécuteur appelle répétitivement la méthode <code>poll()</code>. Si la ressource est prête, elle renvoie <code>Poll::Ready(val)</code>. Sinon, elle enregistre un signal d'éveil via le <code>Waker</code> et renvoie <code>Poll::Pending</code>.
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="action-area">
+                    <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">RÉVÉLER LA RÉPONSE [Espace]</button>
+                    
+                    <div class="fsrs-buttons" id="fsrs-buttons">
+                        <button class="fsrs-btn btn-hard" onclick="submitFSRS(1)">
+                            <span class="btn-title" style="color: #EF4444;">Difficile</span>
+                            <span class="btn-interval" id="int-1">1j</span>
+                        </button>
+                        <button class="fsrs-btn btn-good" onclick="submitFSRS(2)">
+                            <span class="btn-title" style="color: var(--color-alert);">Moyen</span>
+                            <span class="btn-interval" id="int-2">3j</span>
+                        </button>
+                        <button class="fsrs-btn btn-easy" onclick="submitFSRS(3)">
+                            <span class="btn-title" style="color: var(--color-primary);">Facile</span>
+                            <span class="btn-interval" id="int-3">7j</span>
+                        </button>
+                        <button class="fsrs-btn btn-great" onclick="submitFSRS(4)">
+                            <span class="btn-title" style="color: var(--color-success);">Très Facile</span>
+                            <span class="btn-interval" id="int-4">15j</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="shortcuts-tip">Shortcuts : [Espace] Révéler · Touches [1, 2, 3, 4] Évaluation</p>
+            </div>
+        </div>
+
+        <!-- MATHEMATICAL METRICS PANEL -->
+        <div class="metrics-panel">
+            <h3 class="panel-title">Moteur Neuro-Mathématique FSRS 5.0</h3>
+
+            <div class="fsrs-stats">
+                <div class="stat-card">
+                    <p class="stat-label">Stabilité (S)</p>
+                    <p class="stat-value highlight-blue" id="stat-stability">5.2j</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Difficulté (D)</p>
+                    <p class="stat-value highlight-gold" id="stat-difficulty">4.2/10</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Rétention Estimée (R)</p>
+                    <p class="stat-value highlight-green" id="stat-retention">92.4%</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Intervalle Optimal (I)</p>
+                    <p class="stat-value highlight-violet" id="stat-interval">5 jours</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <span>Courbe de Déclin de Mémorisation (R)</span>
+                    <span style="color: var(--color-success);">R_seuil = 90%</span>
+                </div>
+                <canvas id="decayChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CARDS DATABASE
+        const cards = [
+            {
+                category: "PROG · RUST ASYNC",
+                question: "Comment fonctionne le mécanisme de Polling dans les Futures en Rust ?",
+                answer: "Les Futures en Rust sont passives. L'exécuteur appelle la méthode <code>poll()</code>. Si la ressource est prête, elle renvoie <code>Poll::Ready(val)</code>. Sinon, elle enregistre un signal d'éveil via le <code>Waker</code> et renvoie <code>Poll::Pending</code>."
+            },
+            {
+                category: "ARCHITECTURE · STRUCT CONCURRENCY",
+                question: "Quel problème de sûreté résout l'usage de JoinSet et de CancellationToken ?",
+                answer: "Ils garantissent l'absence de tâches orphelines (zombies). Si une branche du <code>JoinSet</code> échoue (panne SAGA), le <code>CancellationToken</code> s'active et interrompt immédiatement tous les autres threads asynchrones associés de manière étanche."
+            },
+            {
+                category: "NEUROSCIENCE · RIF",
+                question: "Qu'est-ce que l'Inhibition Compétitive par Récupération (RIF) ?",
+                answer: "La réactivation sélective d'un nœud d'apprentissage renforce ses synapses, mais dégrade par inhibition sémantique les nœuds connexes non réactivés. SCY Forge applique un coefficient d'amortissement RIF pour affiner l'élagage du graphe."
+            },
+            {
+                category: "COMPLIANCE · SECURITY",
+                question: "Pourquoi isoler l'exécution des outils de code tiers au sein de WebAssembly (WASM) ?",
+                answer: "Pour respecter le principe de moindre privilège. L'exécution d'un script tiers non vérifié au sein d'un runtime WASM bridé empêche toute fuite de variables d'environnement, accès non autorisé au système de fichiers hôte, ou injection de processus."
+            }
+        ];
+
+        let currentCardIndex = 0;
+        let isRevealed = false;
+
+        // FSRS 5.0 STATE VARIABLES
+        let stability = 5.2; // days
+        let difficulty = 4.2; // 1-10 scale
+        const retentionTarget = 0.90; // Standard target
+
+        function updateFSRSUI() {
+            // Update stats
+            document.getElementById('stat-stability').textContent = stability.toFixed(1) + 'j';
+            document.getElementById('stat-difficulty').textContent = difficulty.toFixed(1) + '/10';
+            
+            // Standard decay calculation at day current t=0 (instantaneous R is 100%)
+            // Let's assume elapsed t = interval selected to show dynamic retrievability
+            let intervalDays = Math.max(1, Math.round(stability));
+            let currentR = Math.exp(Math.log(0.9) * (intervalDays / stability)) * 100;
+            document.getElementById('stat-retention').textContent = currentR.toFixed(1) + '%';
+            document.getElementById('stat-interval').textContent = intervalDays + ' ' + (intervalDays > 1 ? 'jours' : 'jour');
+
+            // Recalculate potential intervals for FSRS buttons
+            document.getElementById('int-1').textContent = Math.max(1, Math.round(stability * 0.4)) + 'j';
+            document.getElementById('int-2').textContent = Math.max(2, Math.round(stability * 1.2)) + 'j';
+            document.getElementById('int-3').textContent = Math.max(3, Math.round(stability * 2.8)) + 'j';
+            document.getElementById('int-4').textContent = Math.max(5, Math.round(stability * 5.5)) + 'j';
+
+            // Draw chart
+            drawChart();
+        }
+
+        function revealAnswer() {
+            if (isRevealed) return;
+            isRevealed = true;
+            document.getElementById('btn-reveal').style.display = 'none';
+            document.getElementById('fsrs-buttons').style.display = 'grid';
+            document.getElementById('answer-block').style.display = 'block';
+        }
+
+        function submitFSRS(rating) {
+            // FSRS updates
+            if (rating === 1) { // Hard
+                stability = Math.max(0.5, stability * 0.45);
+                difficulty = Math.min(10, difficulty + 1.2);
+            } else if (rating === 2) { // Good
+                stability = stability * 1.2;
+                difficulty = Math.max(1, Math.min(10, difficulty + 0.2));
+            } else if (rating === 3) { // Easy
+                stability = stability * 2.8;
+                difficulty = Math.max(1, difficulty - 0.4);
+                triggerConfetti();
+            } else if (rating === 4) { // Great
+                stability = stability * 5.5;
+                difficulty = Math.max(1, difficulty - 1.0);
+                triggerConfetti();
+            }
+
+            // Move to next card
+            currentCardIndex = (currentCardIndex + 1) % cards.length;
+            isRevealed = false;
+            
+            // Apply delay before reset to let user notice animation
+            setTimeout(() => {
+                document.getElementById('card-category').textContent = cards[currentCardIndex].category;
+                document.getElementById('card-question').textContent = cards[currentCardIndex].question;
+                document.getElementById('card-answer').innerHTML = cards[currentCardIndex].answer;
+                
+                // Hide answer
+                document.getElementById('answer-block').style.display = 'none';
+                document.getElementById('fsrs-buttons').style.display = 'none';
+                document.getElementById('btn-reveal').style.display = 'block';
+                
+                updateFSRSUI();
+            }, 400);
+        }
+
+        // CONFETTI ANIMATION
+        const confettiCanvas = document.getElementById('confetti');
+        const ctxConfetti = confettiCanvas.getContext('2d');
+        let confettis = [];
+
+        function resizeConfettiCanvas() {
+            confettiCanvas.width = confettiCanvas.parentElement.offsetWidth;
+            confettiCanvas.height = confettiCanvas.parentElement.offsetHeight;
+        }
+        window.addEventListener('resize', resizeConfettiCanvas);
+        resizeConfettiCanvas();
+
+        function triggerConfetti() {
+            resizeConfettiCanvas();
+            confettis = [];
+            for (let i = 0; i < 40; i++) {
+                confettis.push({
+                    x: confettiCanvas.width / 2,
+                    y: confettiCanvas.height / 2,
+                    size: Math.random() * 6 + 4,
+                    color: i % 2 === 0 ? '#10B981' : '#7C3AED',
+                    speedX: (Math.random() - 0.5) * 12,
+                    speedY: (Math.random() - 0.5) * 12 - 5,
+                    alpha: 1
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            if (confettis.length === 0) return;
+            ctxConfetti.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            for (let i = confettis.length - 1; i >= 0; i--) {
+                let c = confettis[i];
+                c.x += c.speedX;
+                c.y += c.speedY;
+                c.speedY += 0.2; // Gravity
+                c.alpha -= 0.02;
+                if (c.alpha <= 0) {
+                    confettis.splice(i, 1);
+                    continue;
+                }
+                ctxConfetti.fillStyle = c.color;
+                ctxConfetti.globalAlpha = c.alpha;
+                ctxConfetti.beginPath();
+                ctxConfetti.arc(c.x, c.y, c.size, 0, Math.PI * 2);
+                ctxConfetti.fill();
+            }
+            if (confettis.length > 0) {
+                requestAnimationFrame(animateConfetti);
+            } else {
+                ctxConfetti.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            }
+        }
+
+        // DECAY CHART DRAWING (using HTML5 Canvas)
+        const canvas = document.getElementById('decayChart');
+        const ctx = canvas.getContext('2d');
+
+        function drawChart() {
+            const width = canvas.parentElement.offsetWidth - 24;
+            const height = 180;
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Chart metrics boundaries
+            const paddingLeft = 35;
+            const paddingBottom = 25;
+            const paddingTop = 10;
+            const paddingRight = 10;
+
+            const graphWidth = width - paddingLeft - paddingRight;
+            const graphHeight = height - paddingTop - paddingBottom;
+
+            // Draw Grid Lines (Y: Retrievability 0% - 100%)
+            ctx.strokeStyle = '#222530';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#6B7280';
+            ctx.font = '10px monospace';
+
+            // Draw Y-axis labels
+            const yLabels = [100, 90, 75, 50, 0];
+            yLabels.forEach(val => {
+                let y = paddingTop + graphHeight * (1 - val/100);
+                ctx.beginPath();
+                ctx.moveTo(paddingLeft, y);
+                ctx.lineTo(width - paddingRight, y);
+                ctx.stroke();
+                ctx.fillText(val + '%', 5, y + 4);
+            });
+
+            // Draw X-axis label (Time t in Days up to 30 days)
+            const maxDays = Math.max(30, Math.round(stability * 1.5));
+            for (let d = 0; d <= maxDays; d += Math.round(maxDays / 5)) {
+                let x = paddingLeft + graphWidth * (d / maxDays);
+                ctx.fillText(d + 'j', x - 6, height - 8);
+            }
+
+            // Draw Forgetting Curve R(t) = exp(ln(0.9) * t / S)
+            ctx.beginPath();
+            ctx.strokeStyle = '#2563EB'; // Electric Blue
+            ctx.lineWidth = 3;
+
+            for (let t = 0; t <= maxDays; t += 0.5) {
+                let r = Math.exp(Math.log(0.9) * (t / stability));
+                if (r < 0) r = 0;
+                let x = paddingLeft + graphWidth * (t / maxDays);
+                let y = paddingTop + graphHeight * (1 - r);
+                if (t === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Highlight standard FSRS review threshold at R = 90%
+            let thresholdY = paddingTop + graphHeight * (1 - 0.90);
+            ctx.beginPath();
+            ctx.strokeStyle = '#10B981'; // Emerald Green
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(paddingLeft, thresholdY);
+            ctx.lineTo(width - paddingRight, thresholdY);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset line dash
+
+            // Highlight current scheduled interval intersection
+            let currentI = Math.max(1, Math.round(stability));
+            let intersectX = paddingLeft + graphWidth * (currentI / maxDays);
+            let intersectY = paddingTop + graphHeight * (1 - Math.exp(Math.log(0.9) * (currentI / stability)));
+
+            ctx.beginPath();
+            ctx.fillStyle = '#7C3AED'; // Violet focus dot
+            ctx.arc(intersectX, intersectY, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#F3F4F6';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        // INITIALIZE
+        updateFSRSUI();
+
+        // KEYBOARD EVENT LISTENERS FOR FLUID WORKFLOW
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                revealAnswer();
+            } else if (e.key === '1') {
+                if (isRevealed) submitFSRS(1);
+            } else if (e.key === '2') {
+                if (isRevealed) submitFSRS(2);
+            } else if (e.key === '3') {
+                if (isRevealed) submitFSRS(3);
+            } else if (e.key === '4') {
+                if (isRevealed) submitFSRS(4);
+            }
+        });
+    </script>
+</body>
+</html>
