@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCY Forge — BRAIN Contextual Panel & RAG Simulator</title>
+    <style>
+        :root {
+            --bg-main: #020205;
+            --bg-card: #0D0D15;
+            --bg-hover: #1E1B4B;
+            --bg-active: #25253A;
+            --color-ai: #7C3AED;
+            --color-success: #10B981;
+            --color-info: #06B6D4;
+            --color-alert: #D97706;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --text-muted: #6B7280;
+            --border-default: #374151;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .app-window {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 380px; /* Left: Main workspace, Right: BRAIN Sidebar */
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-default);
+        }
+
+        @media (max-width: 900px) {
+            .app-window {
+                grid-template-columns: 1fr; /* Stack sidebar on mobile */
+            }
+            .sidebar {
+                display: none; /* Hide on mobile for simplicty */
+            }
+        }
+
+        /* LEFT MAIN WORKSPACE */
+        .workspace {
+            padding: 32px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-default);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .workspace-header {
+            border-bottom: 1px solid var(--border-default);
+            padding-bottom: 16px;
+        }
+
+        .workspace-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .workspace-meta {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--color-info);
+        }
+
+        /* CONTEXT CARDS FOR INTERACTIVE SWITCHING */
+        .context-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .context-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            position: relative;
+        }
+
+        .context-card:hover {
+            border-color: var(--text-secondary);
+            transform: translateY(-2px);
+        }
+
+        .context-card.active {
+            border-color: var(--color-ai);
+            background-color: rgba(124, 58, 237, 0.05);
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.1);
+        }
+
+        .context-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .context-card-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .badge-type {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 4px;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+        }
+
+        /* SOURCE TEXT CONTAINER (RAG VIEW) */
+        .source-viewer {
+            background-color: rgba(13, 13, 21, 0.4);
+            border: 1px solid var(--border-default);
+            border-radius: 10px;
+            padding: 20px;
+            flex-grow: 1;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            font-size: 14px;
+            position: relative;
+        }
+
+        .source-viewer h3 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chunk-highlight {
+            transition: all 0.5s ease;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .chunk-highlight.active-target {
+            background-color: rgba(124, 58, 237, 0.2);
+            color: var(--text-primary);
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
+            border: 1px dashed var(--color-ai);
+            transform: scale(1.02);
+            display: inline-block;
+        }
+
+        /* RIGHT BRAIN SIDEBAR */
+        .sidebar {
+            background-color: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            border-left: 1px solid var(--border-default);
+        }
+
+        /* CONTEXT HEADER */
+        .brain-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-default);
+            background-color: rgba(2, 2, 5, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .active-scope {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scope-icon {
+            font-size: 18px;
+        }
+
+        .scope-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scope-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .scope-subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+        }
+
+        .btn-clear-context {
+            background: none;
+            border: 1px solid var(--border-default);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 10px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            transition: all 0.2s ease;
+        }
+
+        .btn-clear-context:hover {
+            border-color: var(--color-ai);
+            color: var(--text-primary);
+        }
+
+        /* MESSAGES LIST AREA */
+        .messages-container {
+            flex-grow: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background-image: radial-gradient(rgba(124, 58, 237, 0.01) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .avatar.user {
+            background-color: rgba(6, 182, 212, 0.15);
+            color: var(--color-info);
+            border: 1px solid var(--color-info);
+        }
+
+        .avatar.assistant {
+            background-color: rgba(124, 58, 237, 0.15);
+            color: var(--color-ai);
+            border: 1px solid var(--color-ai);
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+
+        .message-content {
+            flex-grow: 1;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .message-title {
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+
+        .citation-badge {
+            background-color: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 9999px;
+            padding: 1px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--color-ai);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 4px;
+            display: inline-block;
+        }
+
+        .citation-badge:hover {
+            background-color: var(--color-ai);
+            color: white;
+            transform: scale(1.08);
+            box-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
+        }
+
+        /* SUGGESTED PROMPT CHIPS */
+        .suggestions-container {
+            padding: 8px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .suggestion-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .suggestion-chip {
+            background-color: rgba(26, 26, 37, 0.4);
+            border: 1px solid var(--border-default);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: left;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .suggestion-chip:hover {
+            border-color: var(--color-ai);
+            color: var(--text-primary);
+            background-color: var(--bg-hover);
+            transform: translateX(4px);
+        }
+
+        .suggestion-chip::after {
+            content: "➔";
+            font-size: 10px;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .suggestion-chip:hover::after {
+            opacity: 1;
+            color: var(--color-ai);
+        }
+
+        /* INPUT BAR */
+        .input-bar {
+            padding: 16px;
+            border-top: 1px solid var(--border-default);
+            background-color: rgba(2, 2, 5, 0.4);
+        }
+
+        .textarea-wrapper {
+            position: relative;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-default);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            transition: border-color 0.2s ease;
+        }
+
+        .textarea-wrapper:focus-within {
+            border-color: var(--color-ai);
+            box-shadow: 0 0 8px rgba(124, 58, 237, 0.2);
+        }
+
+        textarea {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            max-height: 100px;
+            height: 20px;
+            line-height: 1.4;
+        }
+
+        .btn-send {
+            background-color: var(--color-ai);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+
+        .btn-send:hover {
+            background-color: #6D28D9;
+            transform: scale(1.05);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* STREAMING TYPING INDICATOR */
+        .streaming-indicator {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            margin-top: 6px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--color-ai);
+            border-radius: 50%;
+            animation: dot-pulse 1.4s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dot-pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.4; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 1px var(--color-ai)); }
+            50% { filter: drop-shadow(0 0 6px var(--color-ai)); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-window">
+        <!-- LEFT MAIN WORKSPACE (SOURCE & ROADMAP PREVIEW) -->
+        <div class="workspace">
+            <div class="workspace-header">
+                <h1 class="workspace-title">Espace d'Apprentissage Actif</h1>
+                <p class="workspace-meta">SCY FORGE : SELECTION DU CONTEXTE DE TRAVAIL</p>
+            </div>
+
+            <!-- Interactively select context to watch sidebar shift -->
+            <div>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; font-family: var(--font-mono);">
+                    🎯 Cliquez sur un composant pour charger son contexte dans BRAIN :
+                </p>
+                <div class="context-selector-grid">
+                    <!-- DOCUMENT SCOPE -->
+                    <div class="context-card active" id="card-doc" onclick="switchContext('document')">
+                        <span class="badge-type" style="background-color: rgba(6, 182, 212, 0.1); color: var(--color-info);">Doc</span>
+                        <div class="context-card-title" style="color: var(--color-info);">📄 Source d'étude</div>
+                        <div class="context-card-desc">Chapitre 10 : Lifetimes et références en Rust Async.</div>
+                    </div>
+                    <!-- CONCEPT SCOPE -->
+                    <div class="context-card" id="card-concept" onclick="switchContext('concept')">
+                        <span class="badge-type" style="background-color: rgba(217, 119, 6, 0.1); color: var(--color-alert);">Concept</span>
+                        <div class="context-card-title" style="color: var(--color-alert);">💡 Tokio Runtime</div>
+                        <div class="context-card-desc">Détails, centralité de degré et prérequis sémantiques.</div>
+                    </div>
+                    <!-- ROADMAP SCOPE -->
+                    <div class="context-card" id="card-roadmap" onclick="switchContext('roadmap')">
+                        <span class="badge-type" style="background-color: rgba(16, 185, 129, 0.1); color: var(--color-success);">ASCENT</span>
+                        <div class="context-card-title" style="color: var(--color-success);">🗺️ Cursus Actif</div>
+                        <div class="context-card-desc">Objectif de maîtrise : Rust Advanced Mastery (SMI 74/100).</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOURCE TEXT AND ACTIVE CHUNKS (RAG ACCESSIBILITY) -->
+            <div class="source-viewer" id="source-viewer">
+                <h3 id="viewer-title">📄 Source Active : "The Rust Programming Language"</h3>
+                <p style="margin-bottom: 14px;">
+                    En Rust, chaque référence possède une durée de vie (<em>lifetime</em>), qui correspond à la portée pour laquelle cette référence reste valide. La plupart du temps, les lifetimes sont implicites et déduites par le compilateur via les règles d'élision.
+                </p>
+                <p style="margin-bottom: 14px;" id="chunk-1" class="chunk-highlight">
+                    <strong style="color: var(--text-primary);">[Séquence d'Élision de Lifetime]</strong> : Le compilateur utilise trois règles déterministes pour assigner les lifetimes sans annotations manuelles. La première règle attribue une durée de vie distincte à chaque paramètre d'entrée de type référence.
+                </p>
+                <p id="chunk-2" class="chunk-highlight">
+                    <strong style="color: var(--text-primary);">[Le runtime de Tokio]</strong> : Tokio gère l'exécution asynchrone à l'aide d'un ordonnanceur de type <em>work-stealing</em>. Lorsqu'un thread d'exécution s'épuise, il vole (steals) des tâches asynchrones prêtes dans la file d'attente d'autres processeurs locaux pour maximiser l'usage CPU.
+                </p>
+            </div>
+        </div>
+
+        <!-- RIGHT BRAIN PANEL SIDEBAR -->
+        <div class="sidebar">
+            <!-- CONTEXT HEADER (BrainContextHeader) -->
+            <div class="brain-header">
+                <div class="active-scope" id="active-scope">
+                    <span class="scope-icon" id="scope-icon">📄</span>
+                    <div class="scope-details">
+                        <span class="scope-title" id="scope-title">Document actif</span>
+                        <span class="scope-subtitle" id="scope-subtitle">Rust Lifetimes.pdf</span>
+                    </div>
+                </div>
+                <button class="btn-clear-context" id="btn-clear" onclick="clearContext()">Global 🌐</button>
+            </div>
+
+            <!-- MESSAGES LIST (BrainMessageList) -->
+            <div class="messages-container" id="messages-container">
+                <!-- Initial welcoming message -->
+                <div class="message">
+                    <div class="avatar assistant">🧠</div>
+                    <div class="message-content">
+                        <p class="message-title">BRAIN Assistant</p>
+                        Bonjour ! Je suis raccordé à vos documents d'études de SCY Forge. Que souhaitez-vous analyser ?
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUGGESTED PROMPTS (SuggestedPrompts) -->
+            <div class="suggestions-container" id="suggestions-container">
+                <p class="suggestion-title">💡 Suggestions Contextuelles</p>
+                <div id="prompt-list" style="display: flex; flex-direction: column; gap: 6px;">
+                    <!-- Sugg prompts inject here -->
+                </div>
+            </div>
+
+            <!-- INPUT BAR (BrainInput) -->
+            <div class="input-bar">
+                <div class="textarea-wrapper">
+                    <textarea id="brain-textarea" placeholder="Posez une question à BRAIN..." oninput="autoExpand(this)" onkeydown="checkSubmit(event)"></textarea>
+                    <button class="btn-send" id="btn-send" onclick="sendInput()" disabled>▲</button>
+                </div>
+                <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px; font-family: var(--font-mono);">
+                    Shortcuts : [Cmd/Ctrl+Enter] Envoyer
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONTEXT SCOPES AND CORRESPONDING SUGGESTED PROMPTS
+        const contextData = {
+            document: {
+                icon: "📄",
+                title: "Document actif",
+                subtitle: "Rust Lifetimes.pdf",
+                prompts: [
+                    "Résume ce document en 3 points",
+                    "Quelles sont les trois règles d'élision ?",
+                    "Génère une carte APEX sur ce passage"
+                ],
+                viewerTitle: "📄 Source Active : \"The Rust Programming Language\"",
+                viewerContent: `En Rust, chaque référence possède une durée de vie (<em>lifetime</em>), qui correspond à la portée pour laquelle cette référence reste valide. La plupart du temps, les lifetimes sont implicites et déduites par le compilateur.<br><br>
+                <span id="chunk-1" class="chunk-highlight"><strong style="color: var(--text-primary);">[Séquence d'Élision de Lifetime]</strong> : Le compilateur utilise trois règles déterministes pour assigner les lifetimes sans annotations manuelles. La première règle attribue une durée de vie distincte à chaque paramètre d'entrée de type référence.</span>`
+            },
+            concept: {
+                icon: "💡",
+                title: "Concept actif",
+                subtitle: "Tokio Runtime (Profondeur 3)",
+                prompts: [
+                    "Explique-moi ce concept simplement (ELI5)",
+                    "Comment fonctionne l'ordonnanceur de Tokio ?",
+                    "Quels sont ses prérequis sémantiques ?"
+                ],
+                viewerTitle: "💡 Concept Fiché : Tokio Runtime",
+                viewerContent: `Le runtime de Tokio est un framework asynchrone hautement optimisé pour l'exécution d'I/O intensives en Rust.<br><br>
+                <span id="chunk-2" class="chunk-highlight"><strong style="color: var(--text-primary);">[Le runtime de Tokio]</strong> : Tokio gère l'exécution asynchrone à l'aide d'un ordonnanceur de type <em>work-stealing</em>. Lorsqu'un thread d'exécution s'épuise, il vole (steals) des tâches asynchrones prêtes dans la file d'attente d'autres processeurs locaux pour maximiser l'usage CPU.</span>`
+            },
+            roadmap: {
+                icon: "🗺️",
+                title: "Cursus Actif",
+                subtitle: "Rust Advanced Mastery (SMI 74)",
+                prompts: [
+                    "Quelle est ma prochaine étape optimale ?",
+                    "Pourquoi cet ordre de nœuds ?",
+                    "Diagnostic de mes points faibles"
+                ],
+                viewerTitle: "🗺️ Cursus ASCENT : Rust Advanced Mastery",
+                viewerContent: `Votre parcours d'apprentissage s'organise en 5 phases logiques. Vous avez validé la Phase 2 : "Tokio Basics" avec succès.<br><br>
+                Votre prochaine étape critique concerne le nœud <strong style="color: var(--color-success);">"Advanced Work-Stealing patterns"</strong>. Votre FSRS montre une faiblesse de rétention sur le prérequis "Lifetimes". Une révision socratique est fortement conseillée.`
+            },
+            global: {
+                icon: "🌐",
+                title: "Contexte Global",
+                subtitle: "SCY Forge Database",
+                prompts: [
+                    "Lister mes documents récents",
+                    "Afficher mon calendrier de révision",
+                    "Suggérer un nouvel objectif"
+                ],
+                viewerTitle: "🌐 Cockpit Sémantique Central",
+                viewerContent: `Bienvenue dans votre cockpit. Vous avez ingéré un total de 28 concepts sémantiques et possédez 3 documents d'études actifs.<br><br>
+                Votre indice de Maîtrise Systémique (SMI) global est évalué à <strong style="color: var(--color-ai);">74/100</strong>. Votre assiduité de révision APEX est mesurée à 95% d'efficacité.`
+            }
+        };
+
+        let currentScope = 'document';
+
+        // CONTEXT SWITCHING
+        function switchContext(scope) {
+            currentScope = scope;
+            
+            // UI cards update
+            document.querySelectorAll('.context-card').forEach(c => c.classList.remove('active'));
+            if (scope !== 'global') {
+                const cardMap = { 'document': 'card-doc', 'concept': 'card-concept', 'roadmap': 'card-roadmap' };
+                document.getElementById(cardMap[scope]).classList.add('active');
+            }
+
+            // Header update
+            document.getElementById('scope-icon').textContent = contextData[scope].icon;
+            document.getElementById('scope-title').textContent = contextData[scope].title;
+            document.getElementById('scope-subtitle').textContent = contextData[scope].subtitle;
+
+            // Workspace view update
+            document.getElementById('viewer-title').innerHTML = contextData[scope].viewerTitle;
+            document.getElementById('source-viewer').querySelector('p').style.display = 'none'; // Clear simple block
+            document.getElementById('source-viewer').innerHTML = `<h3 id="viewer-title">${contextData[scope].viewerTitle}</h3>` + contextData[scope].viewerContent;
+
+            // Clear highlighted markers
+            resetCitationHighlights();
+
+            // Load suggested prompts
+            loadSuggestions();
+        }
+
+        function clearContext() {
+            switchContext('global');
+        }
+
+        function loadSuggestions() {
+            const list = document.getElementById('prompt-list');
+            list.innerHTML = '';
+            
+            contextData[currentScope].prompts.forEach(p => {
+                const chip = document.createElement('div');
+                chip.className = 'suggestion-chip';
+                chip.textContent = p;
+                chip.onclick = () => {
+                    document.getElementById('brain-textarea').value = p;
+                    document.getElementById('brain-send').disabled = false;
+                    sendInput();
+                };
+                list.appendChild(chip);
+            });
+        }
+
+        // TEXTAREA CONTROL
+        function autoExpand(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight - 20 + 'px';
+            document.getElementById('btn-send').disabled = el.value.trim() === '';
+        }
+
+        function checkSubmit(e) {
+            if (e.code === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendInput();
+            }
+        }
+
+        // STREAMING RAG SIMULATION
+        const simulations = {
+            "Résume ce document en 3 points": {
+                text: "Voici le résumé structurel du chapitre 10 de Rust :\n\n1. **Définition de Portée** : Les lifetimes interdisent les références pendantes (dangling references) à la compilation <span class=\"citation-badge\" onclick=\"highlightChunk('chunk-1')\">[1]</span>.\n2. **Élision Automatique** : Le compilateur applique trois règles strictes d'élision sémantique.\n3. **Annotation Manuelle** : Requise uniquement en cas d'ambiguïté (références multiples).",
+            },
+            "Quelles sont les trois règles d'élision ?": {
+                text: "Les trois règles d'élision de lifetimes du compilateur Rust sont :\n\n1. Chaque paramètre d'entrée de type référence reçoit sa propre durée de vie distincte <span class=\"citation-badge\" onclick=\"highlightChunk('chunk-1')\">[1]</span>.\n2. S'il n'y a qu'un seul paramètre de lifetime d'entrée, sa durée de vie est assignée à toutes les références de sortie.\n3. S'il y a plusieurs paramètres d'entrée mais que l'un d'eux est &self ou &mut self, la durée de vie de self est attribuée à toutes les références de sortie.",
+            },
+            "Comment fonctionne l'ordonnanceur de Tokio ?": {
+                text: "Tokio implémente un planificateur multi-threads basé sur le patron **Work-Stealing** :\n\n- Chaque processeur local gère sa propre file de tâches asynchrones.\n- Lorsqu'une file est vide, le thread effectue un vol (steal) de tâches prêtes depuis la file d'attente d'un processeur voisin <span class=\"citation-badge\" onclick=\"highlightChunk('chunk-2')\">[2]</span>, optimisant les cœurs CPU et évitant le blocage de processus.",
+            },
+            "Explique-moi ce concept simplement (ELI5)": {
+                text: "Imagine que le runtime de **Tokio** est un chef de cuisine dans un restaurant très fréquenté :\n\n- Au lieu d'attendre qu'une casserole d'eau chauffe sans rien faire (I/O asynchrone bloquante), le chef lance la cuisson et va immédiatement découper des légumes (ordonnancement de tâches).\n- Si l'un des cuisiniers n'a plus de travail, il va immédiatement voler des tâches chez son voisin <span class=\"citation-badge\" onclick=\"highlightChunk('chunk-2')\">[2]</span> pour que la cuisine ne s'arrête jamais d'avancer.",
+            }
+        };
+
+        function sendInput() {
+            const textEl = document.getElementById('brain-textarea');
+            const q = textEl.value.trim();
+            if (q === '') return;
+
+            // Clear input area
+            textEl.value = '';
+            textEl.style.height = '20px';
+            document.getElementById('btn-send').disabled = true;
+
+            const container = document.getElementById('messages-container');
+
+            // 1. Append User Message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message';
+            userMsg.innerHTML = `
+                <div class="avatar user">👤</div>
+                <div class="message-content">
+                    <p class="message-title">Vous</p>
+                    ${q}
+                </div>
+            `;
+            container.appendChild(userMsg);
+            container.scrollTop = container.scrollHeight;
+
+            // 2. Append Assistant Message with Streaming typing indicator
+            const assistantMsg = document.createElement('div');
+            assistantMsg.className = 'message';
+            assistantMsg.innerHTML = `
+                <div class="avatar assistant">🧠</div>
+                <div class="message-content" id="temp-streaming">
+                    <p class="message-title">BRAIN Assistant</p>
+                    <div class="streaming-indicator">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                container.appendChild(assistantMsg);
+                container.scrollTop = container.scrollHeight;
+                
+                // Simulate streaming
+                simulateStream(q, assistantMsg.querySelector('#temp-streaming'));
+            }, 600);
+        }
+
+        function simulateStream(query, textContainer) {
+            let simResponse = {
+                text: `Je recherche l'information contextuelle concernant : "${query}" dans Zilliz. Voici les connaissances adaptées de SCY Forge : \n\nLes notions sémantiques sont indexées de manière relationnelle. Vous pouvez interroger un document source ou un nœud ASCENT pour lancer un audit de précision.`
+            };
+
+            // Matches default or matched simulation response
+            if (simulations[query]) {
+                simResponse = simulations[query];
+            }
+
+            const rawText = simResponse.text;
+            textContainer.innerHTML = `<p class="message-title">BRAIN Assistant</p>`; // Clear indicator
+            
+            let charIndex = 0;
+            let currentHTML = "";
+
+            function typeChar() {
+                // If we reach HTML tag or citation tag, print it entirely to prevent raw tags visibility
+                if (rawText[charIndex] === '<') {
+                    let endTagIndex = rawText.indexOf('>', charIndex);
+                    currentHTML += rawText.substring(charIndex, endTagIndex + 1);
+                    charIndex = endTagIndex + 1;
+                } else {
+                    currentHTML += rawText[charIndex];
+                    charIndex++;
+                }
+
+                // Render styled text in real-time
+                textContainer.innerHTML = `<p class="message-title">BRAIN Assistant</p>` + currentHTML.replace(/\n/g, '<br>');
+                const container = document.getElementById('messages-container');
+                container.scrollTop = container.scrollHeight;
+
+                if (charIndex < rawText.length) {
+                    setTimeout(typeChar, 8); // Fast organic streaming
+                } else {
+                    textContainer.removeAttribute('id'); // Remove temp reference
+                }
+            }
+
+            setTimeout(typeChar, 400);
+        }
+
+        // CITATIONS INTERACTIVE HIGHLIGHTING
+        function highlightChunk(chunkId) {
+            resetCitationHighlights();
+            const chunk = document.getElementById(chunkId);
+            if (chunk) {
+                chunk.classList.add('active-target');
+                chunk.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function resetCitationHighlights() {
+            document.querySelectorAll('.chunk-highlight').forEach(el => {
+                el.classList.remove('active-target');
+            });
+        }
+
+        // INITIALIZE
+        switchContext('document');
+    </script>
+</body>
+</html>
