@@ -477,6 +477,19 @@ Une carte physique, lourde, tactile et immersive. Elle est conçue comme un proj
 - **Rétroaction Synaptique** : Lors du retournement de la carte ou de la validation d'une révision APEX, les synapses du cerveau d'arrière-plan subissent une décharge de luminosité (flash) et une accélération de rotation de manière organique.
 - **Balayage Laser (Scanline)** : Au moment de la révélation, une ligne laser néon émeraude (`box-shadow` émeraude) balaie de haut en bas le texte de la réponse pour dissiper un léger effet de flou sémantique d'arrière-plan.
 
+#### ARENA 3D Holographic Wireframe Talking Face (ARENA Module)
+
+**Concept de design** :  
+Une représentation humaine holographique et futuriste du Persona d'épreuve (l'interlocuteur, le client, ou l'auditeur). Ce visage est matérialisé sous la forme d'un maillage géométrique 3D en mouvement constant, renforçant l'immersion des séances orales ou de jeux de rôles vocaux.
+
+**Topologie de Maillage 3D (Mesh Face)** :
+- **Noeuds et Arêtes (Graphe de Visage)** : Constitués de 32 sommets physiques (vertices) luminescents de couleur Cyan (`#06B6D4`) et de 45 liaisons sémantiques (arêtes) de couleur Violet profond (`#7C3AED`). Le réseau dessine les yeux, les sourcils, la structure nasale, le contour de la mâchoire et les lèvres.
+- **Suivi du Regard (Head-Tracking Parallaxe)** : Le maillage complet pivote de manière fluide en 3D selon les mouvements du curseur de la souris (angles de tangage et de lacet), donnant l'impression que l'interlocuteur suit activement l'étudiant du regard.
+
+**Comportement Vocal & Élocution Organique** :
+- **Élocution Tridimensionnelle** : Lorsque le Persona prend la parole (RAG asynchrone), l'algorithme de déformation trigonométrique anime les sommets de la bouche (lèvres supérieure, inférieure et commissures) en modulant leurs coordonnées Y via des fonctions sinus basées sur la fréquence vocale simulée.
+- **Synchronisation d'Ondes** : L'élocution s'accompagne d'une double courbe d'onde audio (wavebars Cyan/Violet) qui réagit dynamiquement durant l'échange vocal, offrant un retour sensoriel complet à l'étudiant pendant sa session d'évaluation ARENA.
+
 ### Modal Patterns
 
 #### Progress Modal (Opérations Longues)
