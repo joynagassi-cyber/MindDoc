@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCY Forge — ARENA Vocal Session 3D Holographic Persona</title>
+    <style>
+        :root {
+            --bg-main: #020205;
+            --bg-card: #0D0D15;
+            --bg-hover: #1E1B4B;
+            --color-ai: #7C3AED;
+            --color-success: #10B981;
+            --color-info: #06B6D4;
+            --color-alert: #D97706;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --text-muted: #6B7280;
+            --border-default: #374151;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient spatial background grid */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(rgba(124, 58, 237, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(2, 2, 5, 0) 97%, rgba(124, 58, 237, 0.02) 3%);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            height: 90vh;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 32px;
+            align-items: center;
+            z-index: 2;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+        }
+
+        /* 3D PERSONA RENDERING PANEL */
+        .persona-panel {
+            background-color: var(--bg-card);
+            border: 2px solid rgba(124, 58, 237, 0.2);
+            border-radius: 20px;
+            padding: 32px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.7),
+                0 0 45px rgba(124, 58, 237, 0.15);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Glassmorphism subtle aura reflection */
+        .persona-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 30%, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .panel-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-default);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-symbol {
+            color: var(--color-ai);
+            font-weight: bold;
+            font-size: 20px;
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+
+        .logo-text {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            background-color: rgba(124, 58, 237, 0.1);
+            border: 1px solid var(--color-ai);
+            color: var(--color-ai);
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--color-ai);
+            border-radius: 50%;
+            animation: dot-pulse 1.4s infinite ease-in-out;
+        }
+
+        /* CANVAS AREA FOR THE 3D WIREFRAME MESH FACE */
+        .canvas-area {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #face-canvas {
+            background-color: transparent;
+            width: 100%;
+            max-width: 480px;
+            height: 380px;
+            cursor: move;
+        }
+
+        /* VOCAL AUDIO WAVEFORM CONTAINER */
+        .vocal-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            border-top: 1px solid var(--border-default);
+            padding-top: 20px;
+        }
+
+        .vocal-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-mic {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background-color: var(--color-ai);
+            border: 2px solid rgba(192, 132, 252, 0.4);
+            color: white;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+        }
+
+        .btn-mic:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.7);
+        }
+
+        .btn-mic.active {
+            background-color: #EF4444;
+            border-color: #FCA5A5;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.7);
+            animation: mic-pulse 1.5s infinite ease-in-out;
+        }
+
+        .audio-wave {
+            width: 260px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .audio-wave.active {
+            opacity: 1;
+        }
+
+        .wave-bar {
+            width: 3px;
+            height: 6px;
+            background-color: var(--color-ai);
+            border-radius: 9999px;
+            transition: height 0.1s ease;
+        }
+
+        /* DIALOGUE & AUDIT PANEL (RIGHT SIDE) */
+        .dialogue-panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: 16px;
+            padding: 24px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-default);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-right: 8px;
+            margin-bottom: 20px;
+        }
+
+        .dialogue-message {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .speaker-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .message-bubble {
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 14px;
+            border-radius: 10px;
+            background-color: rgba(2, 2, 5, 0.4);
+            border: 1px solid var(--border-default);
+        }
+
+        .message-bubble.opponent {
+            border-left: 3px solid var(--color-ai);
+        }
+
+        .message-bubble.player {
+            border-left: 3px solid var(--color-info);
+        }
+
+        /* AUDIT FEEDBACK RADAR CARD */
+        .audit-card {
+            background-color: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.4;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .audit-card-header {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--color-success);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* SHORTCUTS TIP */
+        .shortcuts-tip {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: center;
+            font-family: var(--font-mono);
+            margin-top: 8px;
+        }
+
+        /* ANIMATIONS DEFINITIONS */
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 2px var(--color-ai)); opacity: 0.8; }
+            50% { filter: drop-shadow(0 0 8px var(--color-ai)); opacity: 1; }
+        }
+
+        @keyframes dot-pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.4; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        @keyframes mic-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.8); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 3D HOLOGRAM PERSONA PANEL -->
+        <div class="persona-panel" id="persona-panel" onmousemove="updateFaceTilt(event)">
+            <div class="panel-header">
+                <div class="logo-section">
+                    <span class="logo-symbol">⬢</span>
+                    <span class="logo-text">SCY FORGE : ARENA Sim</span>
+                </div>
+                <div class="status-badge" id="status-badge">
+                    <div class="status-dot"></div>
+                    <span id="status-text">Persona : Client B2B</span>
+                </div>
+            </div>
+
+            <!-- CANVAS FOR THE WIREFRAME TALKING MESH FACE -->
+            <div class="canvas-area">
+                <canvas id="face-canvas"></canvas>
+            </div>
+
+            <!-- AUDIO INTERACTION CONTROLS -->
+            <div class="vocal-area">
+                <div class="vocal-controls">
+                    <div class="audio-wave" id="audio-wave-incoming">
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                    </div>
+
+                    <button class="btn-mic" id="btn-mic" onclick="toggleVocalInput()" title="Parler (Simulation)">🎤</button>
+
+                    <div class="audio-wave" id="audio-wave-outgoing">
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                    </div>
+                </div>
+                <p class="shortcuts-tip">Cliquez sur le micro pour parler, puis recliquez pour soumettre.</p>
+            </div>
+        </div>
+
+        <!-- DIALOGUE AND REALTIME AUDIT PANEL (RIGHT SIDE) -->
+        <div class="dialogue-panel">
+            <h3 class="panel-title">Scénario de Négociation SaaS</h3>
+
+            <div class="chat-box" id="chat-box">
+                <!-- Initial Opponent Message -->
+                <div class="dialogue-message">
+                    <span class="speaker-label" style="color: var(--color-ai);">👤 M. Mercier (Acheteur PME)</span>
+                    <div class="message-bubble opponent" id="opponent-speech">
+                        Votre offre de SCY Forge Pro à 20$/mois par utilisateur semble posséder d'excellentes fonctionnalités neurologiques. Cependant, notre budget de formation est serré. Pouvez-vous justifier la valeur concrète de votre outil ?
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUDIT SYSTEM (Harmonist feedback) -->
+            <div class="audit-card" id="audit-card">
+                <div class="audit-card-header">
+                    <span>🛡️ Audit HARMONIST (Cognitive alignment) :</span>
+                </div>
+                <p id="audit-text">Excellente posture de vente. Vous avez correctement identifié que l'économie de tokens (-90%) et la réduction du temps de formation des équipes (-40%) amortissent l'abonnement dès le 1er mois.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // 3D HOLOGRAPHIC WIREFRAME MESH FACE ALGORITHM
+        // =====================================================================
+        const canvas = document.getElementById('face-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Setup size
+        canvas.width = 480;
+        canvas.height = 380;
+
+        // Interactive mouse rotation tracking
+        let yaw = 0;   // Left-right rotation
+        let pitch = 0; // Up-down rotation
+
+        function updateFaceTilt(e) {
+            const panel = document.getElementById('persona-panel');
+            const rect = panel.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            yaw = (e.clientX - centerX) / 800; // soft tilt
+            pitch = (e.clientY - centerY) / 800;
+        }
+
+        // Reset tilt on mouseleave
+        document.getElementById('persona-panel').addEventListener('mouseleave', () => {
+            yaw = yaw * 0.9;
+            pitch = pitch * 0.9;
+        });
+
+        // 3D Face vertices (x, y, z) defining facial topological mesh
+        let faceVertices = [];
+        let faceEdges = [];
+
+        function initFaceMesh() {
+            faceVertices = [
+                // == Outline Silhouette (0-9) ==
+                { id: 0, x: -80, y: -110, z: 0, baseX: -80, baseY: -110, baseZ: 0 }, // Forehead L
+                { id: 1, x: 80, y: -110, z: 0, baseX: 80, baseY: -110, baseZ: 0 },   // Forehead R
+                { id: 2, x: -110, y: -40, z: 20, baseX: -110, baseY: -40, baseZ: 20 }, // Temple L
+                { id: 3, x: 110, y: -40, z: 20, baseX: 110, baseY: -40, baseZ: 20 },   // Temple R
+                { id: 4, x: -120, y: 30, z: 10, baseX: -120, baseY: 30, baseZ: 10 },  // Cheek L
+                { id: 5, x: 120, y: 30, z: 10, baseX: 120, baseY: 30, baseZ: 10 },    // Cheek R
+                { id: 6, x: -80, y: 110, z: -10, baseX: -80, baseY: 110, baseZ: -10 }, // Jaw L
+                { id: 7, x: 80, y: 110, z: -10, baseX: 80, baseY: 110, baseZ: -10 },   // Jaw R
+                { id: 8, x: -30, y: 140, z: -20, baseX: -30, baseY: 140, baseZ: -20 }, // Chin L
+                { id: 9, x: 30, y: 140, z: -20, baseX: 30, baseY: 140, baseZ: -20 },   // Chin R
+
+                // == Eyebrows (10-13) ==
+                { id: 10, x: -70, y: -60, z: 30, baseX: -70, baseY: -60, baseZ: 30 },
+                { id: 11, x: -20, y: -60, z: 35, baseX: -20, baseY: -60, baseZ: 35 },
+                { id: 12, x: 20, y: -60, z: 35, baseX: 20, baseY: -60, baseZ: 35 },
+                { id: 13, x: 70, y: -60, z: 30, baseX: 70, baseY: -60, baseZ: 30 },
+
+                // == Eyes (14-19) ==
+                { id: 14, x: -55, y: -40, z: 25, baseX: -55, baseY: -40, baseZ: 25 }, // Pupil L
+                { id: 15, x: -30, y: -40, z: 25, baseX: -30, baseY: -40, baseZ: 25 },
+                { id: 16, x: -42, y: -48, z: 28, baseX: -42, baseY: -48, baseZ: 28 }, // Top Lid L
+                { id: 17, x: 30, y: -40, z: 25, baseX: 30, baseY: -40, baseZ: 25 },   // Pupil R
+                { id: 18, x: 55, y: -40, z: 25, baseX: 55, baseY: -40, baseZ: 25 },
+                { id: 19, x: 42, y: -48, z: 28, baseX: 42, baseY: -48, baseZ: 28 },   // Top Lid R
+
+                // == Nose (20-23) ==
+                { id: 20, x: 0, y: -50, z: 40, baseX: 0, baseY: -50, baseZ: 40 },    // Bridge Top
+                { id: 21, x: 0, y: 15, z: 60, baseX: 0, baseY: 15, baseZ: 60 },      // Nose Tip (protrudes)
+                { id: 22, x: -20, y: 20, z: 45, baseX: -20, baseY: 20, baseZ: 45 },  // Nostril L
+                { id: 23, x: 20, y: 20, z: 45, baseX: 20, baseY: 20, baseZ: 45 },    // Nostril R
+
+                // == Mouth (24-31) ==
+                { id: 24, x: -45, y: 60, z: 25, baseX: -45, baseY: 60, baseZ: 25 },  // Left Corner
+                { id: 25, x: -20, y: 50, z: 35, baseX: -20, baseY: 50, baseZ: 35 },  // Top Lip Mid-L
+                { id: 26, x: 0, y: 46, z: 40, baseX: 0, baseY: 46, baseZ: 40 },      // Top Lip Center
+                { id: 27, x: 20, y: 50, z: 35, baseX: 20, baseY: 50, baseZ: 35 },    // Top Lip Mid-R
+                { id: 28, x: 45, y: 60, z: 25, baseX: 45, baseY: 60, baseZ: 25 },    // Right Corner
+                { id: 29, x: 20, y: 70, z: 35, baseX: 20, baseY: 70, baseZ: 35 },    // Bottom Lip Mid-R
+                { id: 30, x: 0, y: 74, z: 40, baseX: 0, baseY: 74, baseZ: 40 },      // Bottom Lip Center
+                { id: 31, x: -20, y: 70, z: 35, baseX: -20, baseY: 70, baseZ: 35 }   // Bottom Lip Mid-L
+            ];
+
+            // Connect vertices to create facial topology edges
+            faceEdges = [
+                // Silhouette contour
+                [0, 2], [2, 4], [4, 6], [6, 8], [8, 9], [9, 7], [7, 5], [5, 3], [3, 1], [0, 1],
+                // Eyebrows
+                [10, 11], [12, 13],
+                // Eyes L & R
+                [14, 16], [16, 15], [14, 15],
+                [17, 19], [19, 18], [17, 18],
+                // Nose
+                [20, 21], [21, 22], [21, 23], [22, 20], [23, 20],
+                // Mouth Outer loop
+                [24, 25], [25, 26], [26, 27], [27, 28], [28, 29], [29, 30], [30, 31], [31, 24],
+                // Connection synapses to make it grid-like (Neural Look)
+                [11, 20], [12, 20], [15, 22], [17, 23], [22, 24], [23, 28],
+                [4, 24], [5, 28], [6, 31], [7, 29], [8, 30], [9, 30]
+            ];
+        }
+
+        // TALKING ANIMATION VARIABLES (mouth movement)
+        let isTalking = false;
+        let talkIntensity = 0;
+
+        function animateMouth() {
+            if (!isTalking) {
+                // Return to normal
+                faceVertices.forEach(p => {
+                    p.y = p.y * 0.85 + p.baseY * 0.15;
+                });
+                return;
+            }
+
+            talkIntensity = talkIntensity * 0.9 + (Math.sin(Date.now() * 0.15) * 14 + 10) * 0.1; // Socratic voice modulation
+
+            // Modulate mouth vertical points (Y-axis)
+            // Left corner (24), Right corner (28) move less.
+            // Center (26, 30) move more.
+            faceVertices[26].y = faceVertices[26].baseY - talkIntensity * 0.3; // Top lip goes up
+            faceVertices[30].y = faceVertices[30].baseY + talkIntensity * 0.7; // Bottom lip goes down
+            faceVertices[25].y = faceVertices[25].baseY - talkIntensity * 0.2;
+            faceVertices[27].y = faceVertices[27].baseY - talkIntensity * 0.2;
+            faceVertices[29].y = faceVertices[29].baseY + talkIntensity * 0.4;
+            faceVertices[31].y = faceVertices[31].baseY + talkIntensity * 0.4;
+        }
+
+        function drawFace() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            animateMouth();
+
+            const originX = canvas.width / 2;
+            const originY = canvas.height / 2 - 10; // offset upward
+
+            const cosY = Math.cos(yaw);
+            const sinY = Math.sin(yaw);
+            const cosX = Math.cos(pitch);
+            const sinX = Math.sin(pitch);
+
+            let projected = [];
+
+            // Project 3D points to 2D screen coordinates with rotation
+            faceVertices.forEach(p => {
+                // Rotate around Y-axis (yaw)
+                let x1 = p.x * cosY - p.z * sinY;
+                let z1 = p.x * sinY + p.z * cosY;
+                let y1 = p.y;
+
+                // Rotate around X-axis (pitch)
+                let y2 = y1 * cosX - z1 * sinX;
+                let z2 = y1 * sinX + z1 * cosX;
+                let x2 = x1;
+
+                // Perspective projection factor
+                const scale = 350 / (350 + z2);
+                const screenX = originX + x2 * scale;
+                const screenY = originY + y2 * scale;
+
+                projected.push({
+                    x: screenX,
+                    y: screenY,
+                    scale: scale,
+                    z: z2
+                });
+            });
+
+            // Draw glowing neon wireframe edges
+            ctx.lineWidth = 1.5;
+            faceEdges.forEach(edge => {
+                let p1 = projected[edge[0]];
+                let p2 = projected[edge[1]];
+
+                // Color based on depth (Z)
+                const avgZ = (p1.z + p2.z) / 2;
+                const alpha = Math.max(0.15, (1 - avgZ / 250));
+
+                ctx.strokeStyle = `rgba(124, 58, 237, ${alpha * 0.8})`; // Violet
+                ctx.shadowColor = 'rgba(124, 58, 237, 0.4)';
+                ctx.shadowBlur = 6;
+
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            });
+
+            // Draw vertices as nodes
+            ctx.shadowBlur = 4;
+            ctx.fillStyle = '#06B6D4'; // Cyan glowing nodes
+            projected.forEach(p => {
+                const alpha = Math.max(0.3, (1 - p.z / 250));
+                ctx.shadowColor = '#06B6D4';
+                ctx.fillStyle = `rgba(6, 182, 212, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3 * p.scale, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.shadowBlur = 0; // Reset shadow
+
+            requestAnimationFrame(drawFace);
+        }
+
+        // Initialize Canvas face mesh
+        initFaceMesh();
+        drawFace();
+
+        // =====================================================================
+        // AUDIO WAVEFORM ANIMATION SIMULATION
+        // =====================================================================
+        let activeWaveInterval = null;
+
+        function animateWaveform(waveId, isActive) {
+            const bars = document.getElementById(waveId).querySelectorAll('.wave-bar');
+            if (!isActive) {
+                bars.forEach(b => b.style.height = '6px');
+                return;
+            }
+
+            bars.forEach(b => {
+                // Organic math frequency height
+                const h = Math.floor(Math.random() * 20) + 4;
+                b.style.height = h + 'px';
+            });
+        }
+
+        function triggerSpeechWaveform(waveId, duration, onComplete) {
+            const wave = document.getElementById(waveId);
+            wave.classList.add('active');
+
+            const interval = setInterval(() => {
+                animateWaveform(waveId, true);
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                animateWaveform(waveId, false);
+                wave.classList.remove('active');
+                if (onComplete) onComplete();
+            }, duration);
+        }
+
+        // =====================================================================
+        // DIALOGUE SAGA STATE ENGINE
+        // =====================================================================
+        let isMicActive = false;
+        let dialoguePhase = 0;
+
+        const playerResponses = [
+            "Notre prix de 20$/mois est entièrement justifié par les gains de productivité de vos équipes. Par exemple, notre indexation universelle de cours économise plus de 15 heures d'étude par semaine.",
+            "L'architecture de SCY Forge utilise des modèles d'agents asynchrones et du Prompt Caching DeepSeek, ce qui réduit le coût d'API de 90%. Nous redistribuons cette marge en vous offrant un accompagnement de classe mondiale avec l'agent expert."
+        ];
+
+        const opponentAnswers = [
+            "C'est un argument pertinent. 15 heures d'étude de gagnées par semaine représentent un amortissement direct pour notre équipe technique. Cependant, l'intégration de vos outils avec nos données de Google Drive et de Slack n'est-elle pas trop complexe ?",
+            "Absolument remarquable. La réduction des coûts d'API combinée à la Proof of Skill cryptographique scelle notre décision. Je valide l'achat d'une flotte de 50 abonnements Pro pour notre cohorte d'ingénieurs. Envoyez-moi le contrat !"
+        ];
+
+        const auditTexts = [
+            "Excellent rappel du ROI (Return on Investment) de la productivité. L'acheteur est sensible au gain de temps (+15h). Il s'inquiète maintenant de l'onboarding et de la connectivité.",
+            "Négociation magistrale. Vous avez mis en avant la souveraineté technologique (Prompt Caching) et le certificat signed Proof of Skill. L'acheteur est convaincu. Vente fermée avec succès ! 🎉"
+        ];
+
+        function toggleVocalInput() {
+            const mic = document.getElementById('btn-mic');
+            const chatBox = document.getElementById('chat-box');
+
+            if (!isMicActive) {
+                // Start speaking
+                isMicActive = true;
+                mic.classList.add('active');
+                document.getElementById('status-text').textContent = "À vous de parler... 🎤";
+                
+                // Animate player microphone wave
+                activeWaveInterval = setInterval(() => {
+                    animateWaveform('audio-wave-outgoing', true);
+                }, 100);
+            } else {
+                // Stop speaking & Send player's vocal answer
+                isMicActive = false;
+                mic.classList.remove('active');
+                clearInterval(activeWaveInterval);
+                animateWaveform('audio-wave-outgoing', false);
+
+                document.getElementById('status-text').textContent = "Analyse vocale HARMONIST...";
+
+                // Append Player Message to Chat
+                const playerText = playerResponses[dialoguePhase];
+                const msg = document.createElement('div');
+                msg.className = 'dialogue-message';
+                msg.innerHTML = `
+                    <span class="speaker-label" style="color: var(--color-info);">👤 Vous (Vendeur SCY Forge)</span>
+                    <div class="message-bubble player">
+                        ${playerText}
+                    </div>
+                `;
+                chatBox.appendChild(msg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                // Trigger AI face speaking in response
+                setTimeout(() => {
+                    isTalking = true; // Face mouth vertices start animating!
+                    document.getElementById('status-text').textContent = "M. Mercier parle... 🔊";
+                    
+                    // Incoming soundwave animation
+                    triggerSpeechWaveform('audio-wave-incoming', 4500, () => {
+                        isTalking = false; // Stop talking
+                        document.getElementById('status-text').textContent = "Fini de parler 🤫";
+                    });
+
+                    // Append Opponent Answer
+                    const opponentText = opponentAnswers[dialoguePhase];
+                    const msgOpp = document.createElement('div');
+                    msgOpp.className = 'dialogue-message';
+                    msgOpp.innerHTML = `
+                        <span class="speaker-label" style="color: var(--color-ai);">👤 M. Mercier (Acheteur PME)</span>
+                        <div class="message-bubble opponent">
+                            ${opponentText}
+                        </div>
+                    `;
+                    chatBox.appendChild(msgOpp);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+
+                    // Trigger Audit card (Harmonist review)
+                    const auditCard = document.getElementById('audit-card');
+                    const auditText = document.getElementById('audit-text');
+                    auditText.textContent = auditTexts[dialoguePhase];
+                    auditCard.style.display = 'block';
+
+                    dialoguePhase++;
+                    if (dialoguePhase >= playerResponses.length) {
+                        dialoguePhase = 0; // Loop or complete
+                    }
+                }, 1500);
+            }
+        }
+    </script>
+</body>
+</html>
