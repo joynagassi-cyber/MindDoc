@@ -113,7 +113,7 @@ Le système combine une **Pipeline Agentique ASCENT** (13 agents autonomes orche
 
 - **ASCENT Completion Rate** : >70% (vs <15% industrie standard)
 - **Temps Until Compétence** : -40% vs estimation initiale (pipeline adaptatif)
-- **Coût LLM/user/mois** : <$0.10 (Free) / <$0.50 (Premium)
+- **Coût LLM/user/mois** : <0,02 $ (Free) / ~0,38 $ (Lite) / ~2,16 $ (Pro) / ~4,50 $ (Ultra)
 - **Score Confiance Docs** : ≥85/100 moyen tous documents générés
 - **Taux Hallucination** : <1% assertions non vérifiées
 - **Cache Hit Rate** : >60% contenu partagé entre users
@@ -168,7 +168,7 @@ OUTPUT : SMI 84/100 + Proof of Skill Certificate ✅
 
 **Pour le business :**
 - **Coût LLM maîtrisé** : $0.006/parcours vs $1.78 pipeline naïve (-99.7%)
-- **Marge préservée** : >99% sur tier Premium $10/mois
+- **Marge préservée** : >85% sur le tier Pro à 15 $/mois, et >90% sur le tier Ultra à 45 $/mois
 - **Différenciation unique** : Aucun concurrent avec pipeline DAG → compétence autonome
 - **Moats solides** : 4 couches compétitives (7 Powers framework)
 

@@ -476,9 +476,12 @@ Une pipeline agentique naïve consommerait **$1.78/parcours** (594K tokens, 600+
 - 10% : GPT-4.5/R1 uniquement si requis
 - Économie : -70% vs modèle unique premium
 
-**Mécanisme 7 : Quotas adaptatifs par tier**
-- Free : 100K tokens max/parcours, 3 parcours actifs max
-- Premium : 500K tokens max/parcours, illimité parcours
+**Mécanisme 7 : Quotas adaptatifs par tier (Ségrégation stricte des modèles et limites)**
+Le système implémente une barrière de sécurité et d'accès aux modèles ainsi que des limites de consommation strictes selon le type d'abonnement :
+- **Free Tier** (0 $ / mois) : Utilise exclusivement les modèles ouverts de production **DeepSeek V4 Flash** et **DeepSeek V4 Pro**. Les modèles propriétaires fermés (Claude Sonnet/Opus) sont **strictement interdits et désactivés**. Limité à 3 documents ingérés/mois, 15 requêtes BRAIN/jour, et 1 parcours simplifié (max 5 nœuds).
+- **Lite Tier** (5 $ / mois) : Ouvre l'accès aux modèles fermés de milieu de gamme comme **Claude Sonnet 4.6** avec des quotas restrictifs (10 documents ingérés/mois, 50 requêtes BRAIN/jour, et 2 parcours actifs de max 8 nœuds). Le modèle Claude Opus 4.8 reste inaccessible.
+- **Pro Tier** (15 $ / mois) : Débloque l'utilisation sélective de **Claude Opus 4.8** (exclusivement dédié à la génération de DAG, à l'agent expert d'audit AGENT-16 et au comité de QA), de **Claude Sonnet 4.6** pour l'écriture et les remédiations complexes, et de **DeepSeek V4 Pro/Flash** pour la gestion de tâches asynchrones et du chat. Limité à 50 documents/mois, requêtes de chat illimitées, 5 parcours actifs (max 15 nœuds) et accès complet à l'ARENA (3 sessions/mois).
+- **Ultra Tier** (45 $ / mois) : Accès maximal sans restriction. **Claude Opus 4.8** est utilisable pour toutes les tâches de calcul et de réflexion fine, documents d'ingestion illimités, parcours d'apprentissage illimités sans limite de nœuds, et simulations d'ARENA illimitées avec hébergement de conteneurs prioritaires sur Northflank.
 
 **Mécanisme 8 : Prompt Caching Provider-Side** ⚡ (Action immédiate requise)
 
@@ -530,26 +533,32 @@ while let Some(token) = stream.next().await {
 | Avec cache mutualisé (>10 users) | $0.0006 | $0.60/mois |
 | **Économie** | **-99.7%** | **-$1 774/mois** |
 
-### 10.4 Marge Préservée
+### 10.4 Marge Préservée par Tier d'Abonnement
 
 ```
-User Free :
-  Coût LLM : $0.018/mois (3 parcours × $0.006)
-  Agents : 01-09 uniquement (pas CHRONICLE ni ARENA)
-  Monétisation : Freemium → upgrade Premium
+Tier 1 : Free (0 $ / mois)
+  - Modèles : DeepSeek V4 Flash, DeepSeek V4 Pro (0% modèles fermés)
+  - Coût LLM estimé : ~0,018 $ / mois / utilisateur (3 parcours simplifiés max)
+  - Fonctionnalités : Mode Normal, APEX (FSRS), COSMOS (limitations de rendu)
+  - Marge d'infrastructure : Couverte par l'attrait de conversion Freemium.
 
-User Premium $10/mois :
-  Agents 01-09  : $0.050/mois (5 parcours actifs × $0.006 × 1.5)
-  CHRONICLE (10): $0.004/mois (disruptions + conversations quotidiennes)
-  ARENA (11)    : $0.045/mois (3 sessions/mois × $0.015)
-  ───────────────────────────────────────────────────────────────
-  TOTAL LLM     : $0.099/mois
-  MARGE         : $9.90/mois = 99% marge brute LLM ✅
+Tier 2 : Lite (5 $ / mois)
+  - Modèles : Claude Sonnet 4.6 (bridé), DeepSeek V4 Pro/Flash (Pas d'Opus 4.8)
+  - Coût LLM estimé : ~0,38 $ / mois / utilisateur
+  - Fonctionnalités : 10 sources, 50 requêtes BRAIN/jour, 2 parcours ASCENT (max 8 nœuds)
+  - Marge Brute LLM : >92% (Marge nette de ~4,62 $) ✅
 
-Différenciation Free vs Premium :
-  Free    : ASCENT pipeline 9 agents (apprentissage autonome)
-  Premium : + CHRONICLE (coéquipier quotidien) + ARENA (validation pratique)
-  → Le Premium = transformation de l'expérience, pas juste + de features
+Tier 3 : Pro (15 $ / mois)
+  - Modèles : Claude Opus 4.8 (DAG, AGENT-16, QA), Claude Sonnet 4.6, DeepSeek Pro
+  - Coût LLM estimé : ~2,16 $ / mois / utilisateur (usage intensif)
+  - Fonctionnalités : 50 sources, 5 parcours (max 15 nœuds), 3 sessions ARENA, CHRONICLE
+  - Marge Brute LLM : >85% (Marge nette de ~12,84 $) ✅
+
+Tier 4 : Ultra (45 $ / mois)
+  - Modèles : Claude Opus 4.8 (tâches critiques et rédaction complexe), Sonnet, DeepSeek Pro
+  - Coût LLM estimé : ~4,50 $ / mois / utilisateur (sans restrictions)
+  - Fonctionnalités : Sources illimitées, parcours illimités, ARENA illimité, priorisation de calcul
+  - Marge Brute LLM : >90% (Marge nette de ~40,50 $) ✅
 ```
 
 ### 10.5 BudgetGuard — Monitoring Temps Réel
