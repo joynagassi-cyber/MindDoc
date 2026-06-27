@@ -1,0 +1,61 @@
+# =============================================================================
+# SCY Forge — .gitignore
+# =============================================================================
+
+# ── Secrets (JAMAIS committer) ────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+!**/.env.example
+!**/.env.sample
+
+# ── Rust (backend_rs/) ────────────────────────────────────────────────────────
+**/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# ── Node / TypeScript (backend_ts/, frontend_react/) ──────────────────────────
+**/node_modules/
+**/dist/
+**/build/
+**/.turbo/
+**/.vite/
+**/coverage/
+*.tsbuildinfo
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ── Python (voice agent worker) ───────────────────────────────────────────────
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/venv/
+**/.mypy_cache/
+**/.pytest_cache/
+
+# ── Docker / sidecars ─────────────────────────────────────────────────────────
+docker/**/data/
+docker/**/volumes/
+
+# ── Données locales (SQLite desktop, audio, exports) ──────────────────────────
+data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+exports/
+downloads/
+
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

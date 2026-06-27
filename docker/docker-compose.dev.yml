@@ -1,0 +1,10 @@
+# SCY Forge — override dev (hot reload). Usage :
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Le frontend/backend tournent en local (pnpm dev) ; seuls les sidecars en Docker.
+services:
+  postgres:
+    ports:
+      - "5432:5432"   # exposé pour le backend local
+  nango:
+    ports:
+      - "3003:3003"   # exposé pour backend_ts local

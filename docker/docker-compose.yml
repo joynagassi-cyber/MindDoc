@@ -1,0 +1,77 @@
+# =============================================================================
+# SCY Forge — docker-compose (dev local)
+# Réf : docs/DEPENDENCY_MANIFEST.md §2 (sidecars), docs/BUILD_COMMANDS.md §4
+# Usage : docker compose up -d   (sidecars seuls pour le dev)
+# =============================================================================
+
+services:
+  # ── Database : PostgreSQL 15 + pgvector ──────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: scy-postgres
+    environment:
+      POSTGRES_USER: scy
+      POSTGRES_PASSWORD: scy_password
+      POSTGRES_DB: scy_forge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scy -d scy_forge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Search Sidecar : SearxNG ($0 méta-recherche) ─────────────────────────────
+  searxng:
+    image: searxng/searxng:latest
+    container_name: scy-searxng
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+
+  # ── Search Sidecar : Perplexica (moteur de réponse IA) ───────────────────────
+  perplexica:
+    image: itzcrazykns/perplexica:latest
+    container_name: scy-perplexica
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./perplexica/.env.example
+    depends_on:
+      - searxng
+
+  # ── Integration Hub : Nango (PRINCIPAL, self-host) ───────────────────────────
+  # Credential vault dans notre PostgreSQL EU — OAuth managé + sync + MCP.
+  nango:
+    image: nangohq/nango:latest
+    container_name: scy-nango
+    ports:
+      - "3003:3003"
+    environment:
+      NANGO_PORT: "3003"
+      # TODO Sprint 0 : pointer vers PostgreSQL dédié (variables .env)
+      SERVER_PORT: "3003"
+    env_file:
+      - ./nango/.env.example
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── LiveKit : serveur WebRTC vocal (5 agents) ────────────────────────────────
+  # Production : LiveKit Cloud (free 50 participants). Dev : self-host ci-dessous.
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: scy-livekit
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    command: --config /etc/livekit.yaml
+    volumes:
+      - ./livekit/config.yaml:/etc/livekit.yaml:ro
+
+volumes:
+  postgres_data:

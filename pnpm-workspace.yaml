@@ -1,0 +1,5 @@
+# SCY Forge — workspace pnpm (monorepo TS/React)
+# Rust est géré séparément par Cargo (backend_rs/Cargo.toml)
+packages:
+  - "backend_ts"
+  - "frontend_react"

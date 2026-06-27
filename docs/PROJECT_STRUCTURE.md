@@ -371,12 +371,8 @@ frontend_react/
 
 ```
 docker/
-├── docker-compose.yml             ← Compose complet (dev + prod)
-├── docker-compose.dev.yml         ← Override dev (hot reload)
-│
-├── backend_rs.Dockerfile          ← Rust (zbpack auto-detect)
-├── backend_ts.Dockerfile          ← TypeScript Node
-├── frontend.Dockerfile            ← React Vite (ou Vercel)
+├── docker-compose.yml             ← Sidecars (PostgreSQL, SearxNG, Perplexica, Nango, LiveKit)
+├── docker-compose.dev.yml         ← Override dev (expose ports pour backend local)
 │
 ├── searxng/
 │   └── settings.yml               ← JSON format + Wolfram Alpha enabled
@@ -384,9 +380,16 @@ docker/
 ├── perplexica/
 │   └── .env.example               ← Config Perplexica sidecar
 │
-└── nango/                         ← Hub d'intégration PRINCIPAL (self-host)
-    ├── docker-compose.nango.yml   ← Nango runtime + credential vault
-    └── .env.example               ← NANGO_SECRET_KEY, NANGO_DB, etc.
+├── nango/
+│   └── .env.example               ← NANGO_ENCRYPTION_KEY, NANGO_DB_* (credential vault)
+│
+└── livekit/
+    └── config.yaml                ← Serveur WebRTC vocal (dev)
+
+# Dockerfiles placés DANS chaque service (Northflank zbpack auto-detect) :
+#   backend_rs/Dockerfile      ← Rust (Axum + Tokio)
+#   backend_ts/Dockerfile      ← TypeScript (Mastra, Node 20)
+#   frontend_react/Dockerfile  ← React 18 (Vite build → nginx)
 ```
 
 ---

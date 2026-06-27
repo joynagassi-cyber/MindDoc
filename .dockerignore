@@ -1,0 +1,16 @@
+# SCY Forge — .dockerignore (réduit le contexte de build Docker)
+**/node_modules
+**/target
+**/dist
+**/build
+**/.git
+**/.venv
+**/__pycache__
+**/coverage
+**/*.log
+.env
+.env.*
+!**/.env.example
+data/
+exports/
+downloads/

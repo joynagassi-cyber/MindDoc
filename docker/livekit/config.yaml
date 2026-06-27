@@ -1,0 +1,13 @@
+# LiveKit dev config (minimal). Réf : scy_livekit_voice_spec.md
+# Générez les clés via `docker run livekit/livekit-server generate-keys`
+port: 7880
+rtc:
+  tcp_port: 7881
+  port_range_start: 50000
+  port_range_end: 60000
+  use_udp: true
+keys:
+  # ⚠️ DEV ONLY — remplacer par des clés générées en production
+  APIdevkey: secret-dev-key-replace-me
+logging:
+  level: info

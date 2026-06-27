@@ -1,0 +1,56 @@
+# =============================================================================
+# SCY Forge — backend_rs Cargo workspace
+# Racine Rust. Members ajoutés au fil des sprints (bottom-up, IMPLEMENTATION_ORDER).
+# Sprint 0 : scy-shared uniquement (types communs dont tout dépend).
+# =============================================================================
+[workspace]
+resolver = "2"
+members = [
+    "crates/scy-shared",
+    # Sprints futurs (décommenter à l'implémentation) :
+    # "crates/scy-eventbus",      # Sprint 0 (fondation)
+    # "crates/scy-ingestion",     # Sprint 1
+    # "crates/scy-neuron-chains", # Sprint 2
+    # "crates/scy-apex-fsrs",     # Sprint 3
+    # "crates/scy-cosmos-kg",     # Sprint 3
+    # "crates/scy-brain-rag",     # Sprint 4
+    # "crates/scy-reader",        # Sprint 4
+    # "crates/scy-imprint",       # Sprint 4
+]
+
+# ── Versions partagées centralisées (Rust 1.64+, CODE_STYLE §1.2) ─────────────
+[workspace.package]
+edition = "2021"
+rust-version = "1.75"
+license = "MIT"
+repository = "https://github.com/joynagassi-cyber/MindDoc"
+
+[workspace.dependencies]
+# Sérialisation
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# IDs : UUID v7 (PRD : UUID v7, timestamps triables)
+uuid = { version = "1", features = ["v7", "serde"] }
+# Erreurs
+thiserror = "1"
+anyhow = "1"
+# Temps (timestamps Unix INTEGER, PRD SQL conventions)
+chrono = { version = "0.4", features = ["serde"] }
+# Async
+tokio = { version = "1", features = ["full"] }
+# Tracing / logging (converge OpenTelemetry / Axiom)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# ── Lints workspace (clippy strict) ───────────────────────────────────────────
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Assouplissements raisonnables
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"

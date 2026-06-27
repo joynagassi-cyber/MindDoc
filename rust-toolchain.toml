@@ -1,0 +1,7 @@
+# SCY Forge — toolchain Rust verrouillée
+# Réf : DEPENDENCY_MANIFEST §7 — Rust 1.75+, edition 2021
+[toolchain]
+channel = "1.75.0"
+components = ["rustfmt", "clippy"]
+profile = "default"
+targets = ["wasm32-unknown-unknown"]  # WASM Edge Computing (D-OPT-001/060)
