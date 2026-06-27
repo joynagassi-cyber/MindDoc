@@ -381,8 +381,12 @@ docker/
 ├── searxng/
 │   └── settings.yml               ← JSON format + Wolfram Alpha enabled
 │
-└── perplexica/
-    └── .env.example               ← Config Perplexica sidecar
+├── perplexica/
+│   └── .env.example               ← Config Perplexica sidecar
+│
+└── nango/                         ← Hub d'intégration PRINCIPAL (self-host)
+    ├── docker-compose.nango.yml   ← Nango runtime + credential vault
+    └── .env.example               ← NANGO_SECRET_KEY, NANGO_DB, etc.
 ```
 
 ---
@@ -406,6 +410,14 @@ OPENAI_API_KEY=...
 # Search Sidecars
 SEARXNG_API_URL=http://searxng:8080
 PERPLEXICA_URL=http://perplexica:3001
+
+# Integration Hub (Nango self-host — PRINCIPAL)
+NANGO_SECRET_KEY=...
+NANGO_PUBLIC_KEY=...
+NANGO_HOST=http://nango:3003
+
+# Composio (⚠️ secondaire/POC lecture-seule — optionnel)
+COMPOSIO_API_KEY=
 
 # OAuth
 GOOGLE_CLIENT_ID=...

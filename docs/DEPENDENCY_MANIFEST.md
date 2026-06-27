@@ -120,15 +120,48 @@ let response = agent.prompt("Generate course for useEffect").await?;
 
 ## 2. PROJETS OPEN-SOURCE DOCKER SIDECARS
 
-### 2.1 Composio — Plateforme d'Intégration OAuth
+### 2.1 Nango — Hub d'Intégration Principal (self-host) 🥇
+
+> **Décision** : Nango est le hub d'intégration **principal** de SCY Forge (pivot approuvé, remplace Composio en rôle principal).
+> **Spéc complète** : `minddoc/s00_architecture_standards/scy_integration_hub_architecture.md`
+
+| Attribut | Valeur |
+|----------|--------|
+| **Projet** | [nango.dev](https://nango.dev) · [github.com/NangoHQ/nango](https://github.com/NangoHQ/nango) |
+| **Licence** | Elastic License 2.0 (**vraiment open source**, runtime + 800+ templates auditables/forkbales) |
+| **Type** | Plateforme d'intégration **self-host** (Docker) — runtime + credential vault + sync + MCP |
+| **Installation** | `docker compose up` (image `nangohq/nango`) · SDK : `pnpm add @nangohq/node @nangohq/frontend` |
+| **Rôle** | OAuth managé (800+ APIs) + **rotation auto des tokens** + **sync données 2-way incrémental** (pour RAG/ingestion) + webhooks + **MCP server built-in** + unified API. **White-label** (écran de connexion brandé SCY Forge). |
+| **Credential vault** | **Stocké dans NOTRE PostgreSQL** (Northflank EU, chiffré) — souveraineté totale, **pas de cloud tiers** |
+| **Utilisation** | AG-02 CONTENT-SCOUT (ingestion sync Notion/Evernote/Drive → KB), 18 agents ASCENT (MCP), frontend Connect UI |
+| **Compliance** | SOC 2 Type II + **GDPR** + **HIPAA** · observabilité OpenTelemetry (converge Axiom/Sentry) |
+| **Coût** | Self-host = **$0** d'API (+ serveur déjà couvert Northflank) ; tiers cloud optionnel usage-based |
+
+```typescript
+// backend_ts/src/integrations/nango.ts
+import Nango from '@nangohq/node';
+
+const nango = new Nango({ secretKey: process.env.NANGO_SECRET_KEY });
+
+// Connect white-label (frontend) puis sync ingestion (backend)
+await nango.sync.start({ provider: 'notion', connectionId: userId });
+// MCP server exposé aux 18 agents : nango.getMcpServer() → tools standardisés
+```
+
+### 2.2 Composio — Secondaire / POC lecture-seule ⚠️
+
+> **⚠️ DÉCLASSÉ** : rôle **secondaire** uniquement (POC + lecture seule de toolkits niche absents de Nango).
+> **Ne JAMAIS y stocker de credentials sensibles en écriture.**
+> **Motif** : plateforme **closed-source** (catalogue + runtime + coffre-fort fermés) + **incident de sécurité mai 2026** (~10 242 credentials clients exposés, RCE sandbox). Incompatible avec notre posture GDPR/souveraineté.
+> **Détails & sources** : `minddoc/s00_architecture_standards/scy_integration_hub_architecture.md`
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [composio.dev](https://composio.dev) |
-| **Type** | SDK TypeScript + Dashboard SaaS (gratuit tier) |
-| **Installation** | `npm i composio-core` |
-| **Rôle** | Handshake OAuth 2.0 pour Google Drive, Twitter, Notion, etc. Gestion/rotation automatique des jetons. Multi-comptes. |
-| **Utilisation** | c05 Google Drive, intégrations Notion/Obsidian |
-| **Sécurité** | Jetons chiffrés AES-256-GCM au repos |
+| **Type** | SDK TypeScript (MIT) + catalogue/runtime **closed-source** + Dashboard SaaS |
+| **Installation** | `pnpm add composio-core` (via MCP hosted, **sans stocker de credentials**) |
+| **Rôle** | ⚠️ **Secondaire** : toolkits niche en lecture seule (fallback si absent de Nango). Rôle principal transféré à **Nango** (§2.1). |
+| **Utilisation** | POC lecture-seule uniquement · **JAMAIS** credentials write/sensibles dans leur cloud |
+| **Sécurité** | 🔴 Cloud tiers fermé (incident mai 2026 : ~10 242 credentials exposés). **Éviter en production** |
 
 ```typescript
 // backend_ts/src/infra/composio.ts
@@ -143,7 +176,7 @@ const { redirectUrl } = await composio.connectedAccounts.initiate({
 });
 ```
 
-### 2.2 Scrapling + CloakBrowser — Scraping Furtif
+### 2.3 Scrapling + CloakBrowser — Scraping Furtif
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [github.com/JosueSCZ/scrapling](https://github.com/JosueSCZ/scrapling) |
@@ -153,7 +186,7 @@ const { redirectUrl } = await composio.connectedAccounts.initiate({
 | **Rôle** | Scraping web furtif : contournement Cloudflare, CAPTCHA, anti-bot. CloakBrowser = moteur d'empreinte navigateur. |
 | **Utilisation** | c02 Web Article Core, c07 Twitter, c10 TikTok |
 
-### 2.3 dom_smoothie — Readability Library
+### 2.4 dom_smoothie — Readability Library
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [github.com/corani/dom_smoothie](https://github.com/corani/dom_smoothie) |
@@ -162,7 +195,7 @@ const { redirectUrl } = await composio.connectedAccounts.initiate({
 | **Rôle** | Extraction du contenu principal (Readability). Purge scripts, ads, nav, cookies popups. HTML → Markdown propre. |
 | **Utilisation** | c02 Web, c05 Drive (HTML exports), c07 Twitter, c08 Wikipedia |
 
-### 2.4 Docling — Conversion Multi-Format
+### 2.5 Docling — Conversion Multi-Format
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [github.com/DS4SD/docling](https://github.com/DS4SD/docling) (IBM Research) |
@@ -173,7 +206,7 @@ const { redirectUrl } = await composio.connectedAccounts.initiate({
 | **Utilisation** | c05 Google Drive, Reader Suite File Viewer |
 | **Coût** | $0 infrastructure (local Docker) |
 
-### 2.5 SearxNG — Méta-Recherche ($0 API)
+### 2.6 SearxNG — Méta-Recherche ($0 API)
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [searxng.org](https://searxng.org) / [github.com/searxng/searxng](https://github.com/searxng/searxng) |
@@ -184,7 +217,7 @@ const { redirectUrl } = await composio.connectedAccounts.initiate({
 | **Config** | `settings.yml` : `formats: [html, json]` + `engines: wolfram_alpha: enabled: true` |
 | **Utilisation** | c02 Web Search Engine V2, BRAIN live web search |
 
-### 2.6 Perplexica / Vane — Moteur de Réponse IA
+### 2.7 Perplexica / Vane — Moteur de Réponse IA
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [github.com/ItzCrazyKns/Vane](https://github.com/ItzCrazyKns/Vane) (ex-Perplexica) |
@@ -195,7 +228,7 @@ const { redirectUrl } = await composio.connectedAccounts.initiate({
 | **Utilisation** | c02 Web Search Engine V2, BRAIN live web search |
 | **Config** | `SEARXNG_API_URL=http://searxng:8080`, LLM via `OPENAI_BASE_URL` (DeepSeek) ou Ollama local |
 
-### 2.7 Harmonist — Framework de Validation Gates
+### 2.8 Harmonist — Framework de Validation Gates
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [github.com/GammaLab-Technologies/Harmonist](https://github.com/GammaLab-Technologies/Harmonist) (PyShine) |
@@ -215,7 +248,7 @@ const pqsGate = new Gate({
 });
 ```
 
-### 2.8 Graphiti / Zep — Graphe de Connaissance Temporel
+### 2.9 Graphiti / Zep — Graphe de Connaissance Temporel
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [github.com/getzep/graphiti](https://github.com/getzep/graphiti) |
@@ -223,7 +256,7 @@ const pqsGate = new Gate({
 | **Rôle** | Graphe de connaissance temporel pour BRAIN RAG. 2-hop neighborhood + PageRank. Consolidation chronologique des conversations. |
 | **Utilisation** | BRAIN Triple Retrieval (Retriever 3 : Graph Traversal) |
 
-### 2.9 GLiNER — NER Local (Named Entity Recognition)
+### 2.10 GLiNER — NER Local (Named Entity Recognition)
 | Attribut | Valeur |
 |----------|--------|
 | **Projet** | [github.com/urchade/GLiNER](https://github.com/urchade/GLiNER) |
@@ -346,7 +379,9 @@ const pqsGate = new Gate({
 | `@mastra/core` | latest | Agent orchestration (Workflow, Step, EventBus) |
 | `zod` | latest | Schema validation (OBLIGATOIRE sur tout retour LLM/API) |
 | `@northflank/sdk` | latest | Northflank deployment API |
-| `composio-core` | latest | OAuth integrations (Google Drive, Twitter, Notion) |
+| `@nangohq/node` | latest | **Hub d'intégration principal** (OAuth managé, sync, MCP) — remplace composio en rôle principal |
+| `@nangohq/frontend` | latest | Composant Connect UI white-label (connexion apps par l'utilisateur) |
+| `composio-core` | latest | ⚠️ **Secondaire/POC** — toolkits niche lecture-seule via MCP hosted (NE PAS stocker de credentials) |
 | `harmonist` | latest | Validation gates framework (hook-driven) |
 | `ace-builds` | latest | Code editor (Multi-View Toggles playground) |
 | `opfs-worker` | latest | OPFS storage (D-DATA-005, BroadcastChannel sync) |
@@ -364,8 +399,8 @@ const pqsGate = new Gate({
 | **Sentry** | Free tier | $0/mois | Error tracking (<5K events/mois) |
 | **Axiom** | Free tier | $0/mois | Logs OpenTelemetry (<100GB/mois) |
 | **Langfuse** | Self-hosted | $0/mois | LLM observabilité (tokens, latence, coût) |
-| **Composio** | Free tier | $0/mois | OAuth management (Google Drive, etc.) |
-| **LiveKit Cloud** | Free tier | $0/mois | WebRTC vocal (50 participants, 10K min/mois) | (Google Drive, etc.) |
+| **Nango** (self-host) | Docker sidecar | $0/mois | Hub d'intégration OAuth **principal** + sync ingestion (credentials dans notre PostgreSQL EU) |
+| **LiveKit Cloud** | Free tier | $0/mois | WebRTC vocal (50 participants, 10K min/mois) |
 
 ### Phase 3 (scaling)
 | Service | Coût estimé | Rôle |
@@ -413,7 +448,7 @@ const pqsGate = new Gate({
 |------------|-------------|--------------|-----------------|
 | **s01 Ingestion** | scraper, article_scraper, feed-rs, epub, roux, google-drive3, google-youtube3, yt-transcript-rs, flate2, tar, quick-xml, calamine, reqwest | — | Scrapling, Docling, SearxNG, Perplexica |
 | **s02 NEURON-CHAINS** | rig, rrag, candle-core, candle-transformers, tiktoken-rs, lancedb, fsrs (shared) | @mastra/core, zod | — |
-| **s03 ASCENT** | petgraph, dashmap, governor | @mastra/core, zod, composio-core, harmonist, @livekit/components-react, livekit-client | LiveKit Server, Voice Agent Worker |
+| **s03 ASCENT** | petgraph, dashmap, governor | @mastra/core, zod, @nangohq/node, @nangohq/frontend, harmonist, @livekit/components-react, livekit-client | LiveKit Server, Voice Agent Worker, **Nango** |
 | **s04 COSMOS** | — | @antv/g6, @cosmograph/cosmos, @antv/g2, @xyflow/react, recharts, nivo, d3, three, graphology+plugins, @duckdb/duckdb-wasm, elkjs | — |
 | **s05 APEX** | fsrs, tiktoken-rs | survey-react-ui, survey-core | — |
 | **s06 BRAIN** | candle-core, lancedb, reqwest | @livekit/components-react, livekit-client | Graphiti/Zep, SearxNG, Perplexica, LiveKit (voice cascade) |
@@ -424,7 +459,7 @@ const pqsGate = new Gate({
 | **s11 Neuro Engine** | — | — | — |
 | **s12 B2B** | — | survey-react-ui, @northflank/sdk | — |
 | **Export 9 formats** | typst, typst-pdf, docx, zip, rust_xlsxwriter, tera, csv | — | — |
-| **Intégrations** | notion-client, notify, pulldown-cmark, gray_matter, keyring | composio-core | — |
+| **Intégrations** | notion-client, notify, pulldown-cmark, gray_matter, keyring | @nangohq/node, @nangohq/frontend, composio-core (⚠️ POC) | **Nango** (self-host) |
 
 ---
 

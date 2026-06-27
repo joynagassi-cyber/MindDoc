@@ -246,18 +246,20 @@ Chaque plateforme a une nature différente. Voici la stratégie d'ingestion reco
 
 ---
 
-## 6. DÉCISION ARCHITECTURALE PROPOSÉE (à valider)
+## 6. DÉCISION ARCHITECTURALE APPROUVÉE ✅
 
-> ⚠️ **Signalement avant action** : ceci contredit partiellement le `DEPENDENCY_MANIFEST` actuel qui liste `composio-core` comme intégrateur OAuth principal. Proposition de pivot.
+> **Statut** : APPROUVÉ par l'utilisateur le 2026-06-27.
+> - **Pivot complet vers Nango** appliqué au `DEPENDENCY_MANIFEST` (commit dédié).
+> - **NotebookLM exclu** + BRAIN positionné comme alternative native.
 
-| Aspect | Avant (manifeste actuel) | Proposition |
+| Aspect | Avant | Après (approuvé) |
 |---|---|---|
-| Hub d'intégration principal | `composio-core` (cloud fermé) | **Nango** self-hosté (open, souverain) |
-| Stockage credentials | Cloud Composio | **PostgreSQL SCY Forge** (chiffré, RLS) |
-| MCP source principale | Composio Tool Router | **Nango MCP server** (built-in) |
-| Composio | Rôle principal | Rôle **secondaire** (lecture seule, POC) |
-| Obsidian / Anki | Non adressés | Cores Desktop dédiés (filesystem/AnkiConnect/.apkg) |
-| NotebookLM | Non adressé | **Exclu** (pas d'API) — BRAIN = alternative |
+| Hub d'intégration principal | `composio-core` (cloud fermé) | ✅ **Nango** self-hosté (open, souverain) |
+| Stockage credentials | Cloud Composio | ✅ **PostgreSQL SCY Forge** (chiffré, RLS, Northflank EU) |
+| MCP source principale | Composio Tool Router | ✅ **Nango MCP server** (built-in) |
+| Composio | Rôle principal | ✅ Rôle **secondaire/POC** lecture-seule (⚠️ incident mai 2026) |
+| Obsidian / Anki | Non adressés | ✅ Cores Desktop dédiés (filesystem/AnkiConnect/.apkg) |
+| NotebookLM | Non adressé | ✅ **Exclu** (pas d'API publique) — BRAIN = alternative |
 
 ### 6.1 Impact sur le code
 - **`backend_rs/scy-ingestion`** : ajouter un module `integration_hub.rs` (client Nango REST/MCP).
