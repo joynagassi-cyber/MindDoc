@@ -54,7 +54,7 @@ frontend_react/ → React (COSMOS, APEX UI, Reader Suite, Dashboard)
 - 🚫 **JAMAIS** : appeler un LLM payant pour une opération marquée `$0` (Rust pur).
 - 🚫 **JAMAIS** : committer des secrets (.env, tokens, clés API).
 - 🚫 **JAMAIS** : modifier les fichiers du dossier `minddoc/s00_prd/` (source de vérité).
-- ⚠️ **DEMANDER** : avant d'ajouter une nouvelle dépendance (crate/npm package).
+- ⚠️ **DEMANDER** : avant d'ajouter une nouvelle dépendance (crate / pnpm package).
 - ⚠️ **DEMANDER** : avant de modifier le schéma BDD.
 
 ## 5. CE QUE TU FAIS TOUJOURS
@@ -77,13 +77,13 @@ cargo test                     # tests
 cargo clippy                   # lints
 
 # Backend TS
-cd backend_ts && npm run dev   # dev server
-npm test                       # tests
+cd backend_ts && pnpm dev       # dev server
+pnpm test                       # tests
 
 # Frontend
-cd frontend_react && npm run dev   # dev server (Vite)
-npm run build                     # build production
-npm test                          # tests
+cd frontend_react && pnpm dev       # dev server (Vite)
+pnpm build                         # build production
+pnpm test                          # tests
 ```
 
 ## 7. ORDRE D'IMPLÉMENTATION

@@ -43,23 +43,23 @@ cargo test --package scy-cosmos-kg engram_vitality_no_nan
 ```bash
 # Installation
 cd backend_ts
-npm install                          # ou pnpm install
+pnpm install                          # installe les dépendances
 
 # Développement
-npm run dev                          # Mastra dev server (hot reload)
+pnpm dev                          # Mastra dev server (hot reload)
 
 # Build
-npm run build                        # compile TypeScript → dist/
+pnpm build                        # compile TypeScript → dist/
 
 # Tests
-npm test                             # tous les tests
-npm test -- --grep "goal"            # tests spécifiques
-npm run test:e2e                     # tests end-to-end
+pnpm test                             # tous les tests
+pnpm test -- --grep "goal"            # tests spécifiques
+pnpm test:e2e                     # tests end-to-end
 
 # Lints
-npm run lint                         # ESLint
-npm run lint:fix                     # auto-fix
-npm run typecheck                    # tsc --noEmit (vérification types)
+pnpm lint                         # ESLint
+pnpm lint:fix                     # auto-fix
+pnpm typecheck                    # tsc --noEmit (vérification types)
 ```
 
 ---
@@ -69,27 +69,27 @@ npm run typecheck                    # tsc --noEmit (vérification types)
 ```bash
 # Installation
 cd frontend_react
-npm install                          # ou pnpm install
+pnpm install                          # installe les dépendances
 
 # Développement
-npm run dev                          # Vite dev server (localhost:5173)
+pnpm dev                          # Vite dev server (localhost:5173)
 
 # Build
-npm run build                        # production build → dist/
-npm run preview                      # prévisualiser le build
+pnpm build                        # production build → dist/
+pnpm preview                      # prévisualiser le build
 
 # Tests
-npm test                             # tous les tests (Vitest)
-npm test -- --ui                     # interface visuelle
-npm run test:e2e                     # Playwright E2E
+pnpm test                             # tous les tests (Vitest)
+pnpm test -- --ui                     # interface visuelle
+pnpm test:e2e                     # Playwright E2E
 
 # Lints
-npm run lint                         # ESLint
-npm run lint:fix                     # auto-fix
-npm run typecheck                    # tsc --noEmit
+pnpm lint                         # ESLint
+pnpm lint:fix                     # auto-fix
+pnpm typecheck                    # tsc --noEmit
 
 # Bundle analyzer
-npm run build -- --analyze           # visualiser le bundle
+pnpm build -- --analyze           # visualiser le bundle
 ```
 
 ---
@@ -172,7 +172,7 @@ curl http://localhost:3000/api/cosmos/benchmark?nodes=5000
 
 ```bash
 # COSMOS 60 FPS benchmark (1000 nœuds)
-cd frontend_react && npm run test:perf:cosmos
+cd frontend_react && pnpm test:perf:cosmos
 
 # FSRS 1800 révisions benchmark ($0 LLM)
 cd backend_rs && cargo test --release --package scy-apex-fsrs -- benchmark
